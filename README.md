@@ -1,3 +1,3 @@
 # ShellGenius
 
-ShellGenius is a CLI tool designed to simplify your command-line experience. You describe a task, and it converts it into a shell command.
+ShellGenius is an intuitive CLI tool designed to enhance your command-line experience by turning your task descriptions into efficient shell commands.
