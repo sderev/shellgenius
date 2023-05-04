@@ -54,11 +54,17 @@ def shellgenius(ctx, command_description):
     Generate and optionally execute a shell command based on the given command description.
 
     Example:
-        $ shellgenius create a new file called example.txt
-        Generated command: touch example.txt
+
+        shellgenius create a new file called example.txt
+
+        `touch example.txt`
+
         Explanation:
+
         - touch command is used to create a new file if it doesn't exist
+
         - example.txt is the name of the new file
+
         Do you want to execute this command? [Y/n]: y
     """
     if not command_description:

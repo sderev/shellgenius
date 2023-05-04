@@ -9,7 +9,7 @@ with open("requirements.txt", "r", encoding="utf-8") as file:
 
 setup(
     name="shellgenius",
-    version="0.1.2",
+    version="0.1.3",
     packages=find_packages(),
     install_requires=requirements,
     entry_points={
