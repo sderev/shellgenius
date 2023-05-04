@@ -4,7 +4,7 @@ ShellGenius is an intuitive CLI tool designed to enhance your command-line exper
 
 Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate commands based on your input and provides step-by-step explanations to help you understand the underlying logic.
 
-![ShellGenius Demo](assets/demo.gif)
+https://user-images.githubusercontent.com/24412384/236322725-435b92c6-6d33-421f-8662-7eb6355d3f64.mp4
 
 ## Table of Contents
 
