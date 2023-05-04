@@ -101,8 +101,9 @@ shellgenius "count the number of lines in a file called data.csv"
 
 **Output:**
 
-```
+```markdown
 wc -l data.csv
+
 Explanation:
 * wc is a word, line, and byte count utility
 * -l flag counts the number of lines
