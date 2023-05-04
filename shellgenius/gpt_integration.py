@@ -1,5 +1,4 @@
 import os
-import json
 import openai
 import tiktoken
 import time
