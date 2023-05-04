@@ -90,7 +90,7 @@ Explanation:
 * touch command is used to create a new file if it doesn't exist
 * example.txt is the name of the new file
 
-Be carefula with your answer.
+Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
 ```
 ___
@@ -108,7 +108,7 @@ Explanation:
 * -l flag counts the number of lines
 * data.csv is the target file
 
-Be carefula with your answer.
+Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
 ```
 
