@@ -61,7 +61,7 @@ def shellgenius(command_description):
         Do you want to execute this command? [Y/n]: y
     """
     if not command_description:
-        click.echo(click.style("No command description provided", fg="red"))
+        click.echo(ctx.get_help()
         return
 
     command_description = " ".join(command_description)
