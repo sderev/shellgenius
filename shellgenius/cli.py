@@ -48,7 +48,8 @@ def rich_markdown_callback(chunk: str) -> None:
 
 @click.command()
 @click.argument("command_description", type=str, nargs=-1)
-def shellgenius(command_description):
+@click.pass_context
+def shellgenius(ctx, command_description):
     """
     Generate and optionally execute a shell command based on the given command description.
 
@@ -61,7 +62,7 @@ def shellgenius(command_description):
         Do you want to execute this command? [Y/n]: y
     """
     if not command_description:
-        click.echo(ctx.get_help()
+        click.echo(ctx.get_help())
         return
 
     command_description = " ".join(command_description)
