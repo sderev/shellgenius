@@ -47,7 +47,7 @@ def rich_markdown_callback(chunk: str) -> None:
 
 
 @click.command()
-@click.argument("command_description", required=True, type=str, nargs=-1)
+@click.argument("command_description", type=str, nargs=-1)
 def shellgenius(command_description):
     """
     Generate and optionally execute a shell command based on the given command description.
