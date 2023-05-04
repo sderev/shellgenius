@@ -25,7 +25,7 @@ pip install shellgenius
 
 ### Install via `pipx` (recommended)
 
-`pipx` is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install VocabMaster.
+`pipx` is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install ShellGenius.
 
 **First, install `pipx` if you haven't already:**
 
@@ -45,10 +45,10 @@ Alternatively, you can use your package manager (`brew`, `apt`, etc.).
   py -m pipx ensurepath
   ```
 
-**Once `pipx` is installed, you can install VocabMaster using the following command:**
+**Once `pipx` is installed, you can install ShellGenius using the following command:**
 
 ```
-pipx install vocabmaster
+pipx install shellgenius
 ```
 
 ### OpenAI API key
