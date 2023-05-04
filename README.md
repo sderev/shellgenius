@@ -119,3 +119,7 @@ ShellGenius is powered by an AI model and may not always generate the most effic
 ## License
 
 ShellGenius is released under the [MIT License](LICENSE).
+
+___
+
+<https://github.com/sderev/shellgenius>
