@@ -60,6 +60,10 @@ def shellgenius(command_description):
         - example.txt is the name of the new file
         Do you want to execute this command? [Y/n]: y
     """
+    if not command_description:
+        click.echo(click.style("No command description provided", fg="red"))
+        return
+
     command_description = " ".join(command_description)
     prompt = format_prompt(command_description)
     click.echo()
