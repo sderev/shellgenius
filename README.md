@@ -77,6 +77,8 @@ The tool will generate a shell command based on your description, display it wit
 
 Here are some examples of ShellGenius in action:
 
+### Create a file
+
 ```bash
 shellgenius "create a new file called example.txt"
 ```
@@ -94,6 +96,8 @@ Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
 ```
 ___
+
+### Number of lines in a file
 
 ```bash
 shellgenius "count the number of lines in a file called data.csv"
