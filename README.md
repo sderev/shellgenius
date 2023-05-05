@@ -57,9 +57,17 @@ ShellGenius requires an OpenAI API key to function. You can obtain a key by sign
 
 Once you have your API key, set it as an environment variable:
 
-```bash
-export OPENAI_API_KEY="your-api-key-here"
-```
+* On macOS and Linux:
+
+  ```bash
+  export OPENAI_API_KEY="your-api-key-here"
+  ```
+
+* On Windows:
+
+  ```
+  setx OPENAI_API_KEY your_key
+  ```
 
 ## Usage
 
