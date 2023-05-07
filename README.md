@@ -20,7 +20,7 @@ https://user-images.githubusercontent.com/24412384/236322725-435b92c6-6d33-421f-
 Ensure you have Python 3.8 or later installed on your system. To install ShellGenius, use the following command:
 
 ```bash
-pip install shellgenius
+python3 -m pip install shellgenius
 ```
 
 ### Install via `pipx` (recommended)
