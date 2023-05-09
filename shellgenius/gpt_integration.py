@@ -8,9 +8,7 @@ def format_prompt(command_description, os_name):
     prompt = [
         {
             "role": "system",
-            "content": (
-                "You are an expert in using {os_name} and the shell terminal."
-            ),
+            "content": f"You are an expert in using {os_name} and the shell terminal.",
         },
         {
             "role": "user",
@@ -74,10 +72,10 @@ def chatgpt_request(
             chunk_message = chunk["choices"][0]["delta"]  # extract the message
             collected_messages.append(chunk_message)  # save the message
 
-            if chunk_callback: # call the callback with the chunk message
+            if chunk_callback:  # call the callback with the chunk message
                 chunk_callback(chunk_message.get("content", ""))
             # print(chunk_message.get("content", ""), end="")  # stream the message
-        #print()
+        # print()
         response = collected_chunks
 
         # Save the time delay and text received
