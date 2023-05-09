@@ -21,6 +21,7 @@ Functions:
 """
 import re
 import subprocess
+import platform
 import click
 from rich.console import Console
 from rich.markdown import Markdown
@@ -72,7 +73,8 @@ def shellgenius(ctx, command_description):
         return
 
     command_description = " ".join(command_description)
-    prompt = format_prompt(command_description)
+    os_name = "macOS" if platform.system() == "Darwin" else platform.system()
+    prompt = format_prompt(command_description, os_name)
     click.echo()
 
     with live:

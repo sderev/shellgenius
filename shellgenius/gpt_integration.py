@@ -4,18 +4,18 @@ import tiktoken
 import time
 
 
-def format_prompt(command_description):
+def format_prompt(command_description, os_name):
     prompt = [
         {
             "role": "system",
             "content": (
-                "You are an expert in using Unix-like OS and the shell terminal."
+                "You are an expert in using {os_name} and the shell terminal."
             ),
         },
         {
             "role": "user",
             "content": f"""
-            I will give you a brief description of something I want to achieve in a Unix-like shell.
+            I will give you a brief description of something I want to achieve in a {os_name} shell.
             I want you to answer with the command that matches the result I want to produce.
             The first line of your answer will be the said shell command.
             Then, I want you to explain it step by step with a bullet list.
