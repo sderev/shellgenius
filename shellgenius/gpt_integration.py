@@ -5,6 +5,7 @@ import time
 
 
 def format_prompt(command_description, os_name):
+    shell_name = "powershell" if os_name == "Windows" else "bash"
     prompt = [
         {
             "role": "system",
@@ -22,7 +23,7 @@ def format_prompt(command_description, os_name):
             * In absolutely no circumstance you are allowed to start your message by anything but the shell command. 
 
             To be absolutely clear, here is how your answer has to look like:
-            ```bash
+            ```{shell_name}
             command
             ```
             ### Explanation:
