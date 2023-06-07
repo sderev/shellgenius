@@ -23,7 +23,7 @@ Ensure you have Python 3.8 or later installed on your system. To install ShellGe
 python3 -m pip install shellgenius
 ```
 
-### Install via `pipx` (recommended)
+### Install via [pipx](https://pypi.org/project/pipx/) (recommended)
 
 `pipx` is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install ShellGenius.
 
