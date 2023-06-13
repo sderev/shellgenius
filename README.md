@@ -4,18 +4,36 @@ ShellGenius is an intuitive CLI tool designed to enhance your command-line exper
 
 Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate commands based on your input and provides step-by-step explanations to help you understand the underlying logic.
 
-https://github.com/sderev/shellgenius/assets/24412384/58d1196e-877a-42bc-9eda-afb69f9a5953
-
-https://github.com/sderev/shellgenius/assets/24412384/bdaf2bfa-2d25-4445-989e-53a329a92f1c
-
+<!-- TOC -->
 ## Table of Contents
 
-* [Installation](#installation)
-* [Usage](#usage)
-* [Examples](#examples)
-* [Limitations](#limitations)
-* [Contributing](#contributing)
-* [License](#license)
+1. [Video Demos](#video-demos)
+    1. [Video Frames Extraction](#video-frames-extraction)
+    1. [Directory Synchronization](#directory-synchronization)
+1. [Installation](#installation)
+    1. [Install via pipx (recommended)](#install-via-pipxhttpspypiorgprojectpipx-recommended)
+    1. [OpenAI API key](#openai-api-key)
+1. [Usage](#usage)
+    1. [Regarding the Quotes](#regarding-the-quotes)
+    1. [Creating an Alias](#creating-an-alias)
+1. [Examples](#examples)
+    1. [Remove Duplicate Lines](#remove-duplicate-lines)
+    1. [Extract Columns in a File](#extract-columns-in-a-file)
+    1. [Download a File](#download-a-file)
+    1. [Number of Lines in a File](#number-of-lines-in-a-file)
+1. [Limitations](#limitations)
+1. [License](#license)
+<!-- /TOC -->
+
+## Video Demos
+
+### Video Frames Extraction
+
+https://github.com/sderev/shellgenius/assets/24412384/58d1196e-877a-42bc-9eda-afb69f9a5953
+
+### Directory Synchronization
+
+https://github.com/sderev/shellgenius/assets/24412384/bdaf2bfa-2d25-4445-989e-53a329a92f1c
 
 ## Installation
 
@@ -137,6 +155,8 @@ Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
 ```
 
+___
+
 ### Extract Columns in a File
 
 ```bash
@@ -157,6 +177,8 @@ Explanation:
 Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
 ```
+
+___
 
 ### Download a File
 
