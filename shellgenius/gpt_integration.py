@@ -14,24 +14,29 @@ def format_prompt(command_description, os_name):
         {
             "role": "user",
             "content": f"""
-            I will give you a brief description of something I want to achieve in a {os_name} shell.
-            I want you to answer with the command that matches the result I want to produce.
-            The first line of your answer will be the said shell command.
-            Then, I want you to explain it step by step with a bullet list.
+For the given task in a {os_name} shell, I need you to provide the corresponding command along with a step-by-step explanation. Follow these guidelines for your response:
 
-            This is very important:
-            * In absolutely no circumstance you are allowed to start your message by anything but the shell command. 
+1. Begin your response with the exact shell command.
+2. Follow the command with a step-by-step explanation in bullet point format.
 
-            To be absolutely clear, here is how your answer has to look like:
-            ```{shell_name}
-            command
-            ```
-            ### Explanation:
-            * something
-            * something
-            * something
-            ---
-            {command_description}
+Please note:
+
+* Your response should always start with the shell command. No exceptions.
+
+Here's the required format:
+
+```{shell_name}
+command
+```
+
+### Explanation:
+
+* Step 1: ...
+* Step 2: ...
+* Step 3: ...
+
+---
+{command_description}
             """,
         },
     ]
