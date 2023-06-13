@@ -40,7 +40,7 @@ def format_prompt(command_description, os_name):
 
 def chatgpt_request(
     prompt,
-    model="gpt-3.5-turbo-0301",
+    model="gpt-3.5-turbo-0613",
     max_tokens=3600,
     n=1,
     temperature=0.5,
@@ -97,14 +97,14 @@ def chatgpt_request(
     )
 
 
-def num_tokens_from_string(string, model="gpt-3.5-turbo-0301"):
+def num_tokens_from_string(string, model="gpt-3.5-turbo-0613"):
     """Returns the number of tokens in a text string."""
     encoding = tiktoken.encoding_for_model(model)
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
 
-def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
+def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
     """Returns the number of tokens used by a list of messages."""
     try:
         encoding = tiktoken.encoding_for_model(model)
@@ -114,21 +114,21 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
     if model == "gpt-3.5-turbo":
         print(
             "Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming"
-            " gpt-3.5-turbo-0301."
+            " gpt-3.5-turbo-0613."
         )
-        return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301")
+        return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
     elif model == "gpt-4":
         print(
             "Warning: gpt-4 may change over time. Returning num tokens assuming"
-            " gpt-4-0314."
+            " gpt-4-0613."
         )
-        return num_tokens_from_messages(messages, model="gpt-4-0314")
-    elif model == "gpt-3.5-turbo-0301":
+        return num_tokens_from_messages(messages, model="gpt-4-0613")
+    elif model == "gpt-3.5-turbo-0613":
         tokens_per_message = (
             4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
         )
         tokens_per_name = -1  # if there's a name, the role is omitted
-    elif model == "gpt-4-0314":
+    elif model == "gpt-4-0613":
         tokens_per_message = 3
         tokens_per_name = 1
     else:
@@ -156,11 +156,15 @@ def estimate_prompt_cost(message):
     num_tokens = num_tokens_from_messages(message)
 
     prices = {
-        "gpt-3.5-turbo-0301": 0.002,
-        "gpt-4-0314": 0.03,
-        "gpt-3.5-turbo": 0.002,
-        "gpt-4-8k": 0.03,
+        "gpt-3.5-turbo": 0.0015,
+        "gpt-3.5-turbo-0613": 0.0015,
+        "gpt-3.5-turbo-0613": 0.0015,
+        "gpt-3.5-turbo-16k": 0.003,
+        "gpt-4": 0.03,
+        "gpt-4-0613": 0.03,
+        "gpt-4-0613": 0.03,
         "gpt-4-32k": 0.06,
+        "gpt-4-32k-0613": 0.06,
     }
 
     return {model: estimated_cost(num_tokens, price) for model, price in prices.items()}
