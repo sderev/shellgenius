@@ -29,11 +29,11 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
 
 ### Video Frames Extraction
 
-https://github.com/sderev/shellgenius/assets/24412384/58d1196e-877a-42bc-9eda-afb69f9a5953
+https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3fdf02fc627f
 
 ### Directory Synchronization
 
-https://github.com/sderev/shellgenius/assets/24412384/bdaf2bfa-2d25-4445-989e-53a329a92f1c
+https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9bc4c9303f7
 
 ## Installation
 
