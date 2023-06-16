@@ -10,7 +10,7 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
 1. [Video Demos](#video-demos)
     1. [Video Frames Extraction](#video-frames-extraction)
     1. [Directory Synchronization](#directory-synchronization)
-    1. [Find & Copy Files with Keywords](#find-copy-files-with-keywords)
+    1. [Find and Copy Files with Keywords](#find-and-copy-files-with-keywords)
 1. [Installation](#installation)
     1. [Install via pipx (recommended)](#install-via-pipx-recommended)
     1. [OpenAI API key](#openai-api-key)
@@ -36,7 +36,7 @@ https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3f
 
 https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9bc4c9303f7
 
-### Find & Copy Files with Keywords
+### Find and Copy Files with Keywords
 
 ![shellgenius_3](https://github.com/sderev/shellgenius/assets/24412384/b52fbcf1-ae5a-4c0e-ae3c-29d2f5aae60a)
 
