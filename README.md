@@ -229,7 +229,7 @@ ShellGenius is powered by an AI model and may not always generate the most effic
 
 ## License
 
-ShellGenius is released under the [MIT License](LICENSE).
+ShellGenius is released under the [Apache 2.0 Licence](LICENSE).
 
 ___
 
