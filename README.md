@@ -35,6 +35,10 @@ https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3f
 
 https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9bc4c9303f7
 
+### Find & Copy Files with Keywords
+
+![shellgenius_3](https://github.com/sderev/shellgenius/assets/24412384/004fbe57-84a7-48f1-9669-a78aec4c4fe9)
+
 ## Installation
 
 Ensure you have Python 3.8 or later installed on your system. To install ShellGenius, use the following command:
