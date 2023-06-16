@@ -37,7 +37,7 @@ https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9
 
 ### Find & Copy Files with Keywords
 
-![shellgenius_3](https://github.com/sderev/shellgenius/assets/24412384/004fbe57-84a7-48f1-9669-a78aec4c4fe9)
+![shellgenius_3](https://github.com/sderev/shellgenius/assets/24412384/b52fbcf1-ae5a-4c0e-ae3c-29d2f5aae60a)
 
 ## Installation
 
