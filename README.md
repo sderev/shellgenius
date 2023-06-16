@@ -83,6 +83,20 @@ Once you have your API key, set it as an environment variable:
   export OPENAI_API_KEY="your-api-key-here"
   ```
 
+  To avoid having to type it everyday, you can create a file with the key:
+
+  ```bash
+  echo "your-api-key" > ~/.openai-api-key.txt
+  ```
+
+  **Note:** Remember to replace `"your-api-key"` with your actual API key.
+
+  And then, you can add this to your shell configuration file (`.bashrc`, `.zshrc`, etc.):
+
+    ```bash
+    export OPENAI_API_KEY="$(cat ~/.openai-api-key.txt)"
+    ```
+
 * On Windows:
 
   ```
