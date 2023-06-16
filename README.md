@@ -12,7 +12,7 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
     1. [Directory Synchronization](#directory-synchronization)
     1. [Find & Copy Files with Keywords](#find-copy-files-with-keywords)
 1. [Installation](#installation)
-    1. [Install via [pipx](https://pypi.org/project/pipx/) (recommended)](#install-via-pipxhttpspypiorgprojectpipx-recommended)
+    1. [Install via pipx (recommended)](#install-via-pipx-recommended)
     1. [OpenAI API key](#openai-api-key)
 1. [Usage](#usage)
     1. [Regarding the Quotes](#regarding-the-quotes)
@@ -48,9 +48,9 @@ Ensure you have Python 3.8 or later installed on your system. To install ShellGe
 python3 -m pip install shellgenius
 ```
 
-### Install via [pipx](https://pypi.org/project/pipx/) (recommended)
+### Install via pipx (recommended)
 
-`pipx` is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install ShellGenius.
+[`pipx`](https://pypi.org/project/pipx/) is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install ShellGenius.
 
 **First, install `pipx` if you haven't already**:
 
