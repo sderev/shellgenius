@@ -17,6 +17,7 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
 1. [Usage](#usage)
     1. [Regarding the Quotes](#regarding-the-quotes)
     1. [Creating an Alias](#creating-an-alias)
+    1. [Make ShellGenius Repond in Your Native Language](#make-shellgenius-repond-in-your-native-language)
 1. [Examples](#examples)
     1. [Remove Duplicate Lines](#remove-duplicate-lines)
     1. [Extract Columns in a File](#extract-columns-in-a-file)
@@ -136,7 +137,7 @@ shellgenius "find and replace 'oldtext' with 'newtext' in *.txt files"
 
 ### Creating an Alias
 
-To further enhance the usability of ShellGenius, even with the presence of autocompletion, I recommend to create an alias for effortless access. One suggested alias is `??`.
+To further enhance the usability of ShellGenius, even with the presence of autocompletion, **I recommend to create an alias** for effortless access. One suggested alias is `??`.
 
 By defining an alias, you can invoke ShellGenius simply by typing `??` followed by your task description, eliminating the need to type the full command each time.
 
@@ -149,6 +150,20 @@ alias '??'='shellgenius'
 After adding the alias, you can use ShellGenius by typing `??` instead of `shellgenius`, making your command-line experience even more seamless and efficient.
 
 **Note**: Make sure to restart your shell or run `source ~/.bashrc` (or the corresponding file for your shell) for the alias to take effect.
+
+### Make ShellGenius Repond in Your Native Language
+
+You can describe your task in your native language, but ShellGenius might still respond in English. If you'd like ShellGenius to respond in your language, you can add a specific request at the end of your task description. Here's an example:
+
+```
+shellgenius "Description of your task in your own language. Réponds en français."
+```
+
+In the above command, "Réponds en français" is a request for ShellGenius to respond in French. You can replace this with a similar phrase in your language. For example, if you want the response in German, you can use "Antworte auf Deutsch". ShellGenius will then oblige and respond in the requested language.
+
+```
+shellgenius "Erstellt eine Datei. Antworte auf Deutsch."
+```
 
 ## Examples
 
