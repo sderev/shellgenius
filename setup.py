@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+VERSION = "0.1.10"
+
 
 with open("README.md", encoding="UTF-8") as file:
     readme = file.read()
@@ -10,7 +12,7 @@ with open("requirements.txt", "r", encoding="utf-8") as file:
 setup(
     name="ShellGenius",
     description="ShellGenius is a tool to generate shell commands from description in natural language.",
-    version="0.1.9",
+    version=VERSION,
     packages=find_packages(),
     install_requires=requirements,
     entry_points={

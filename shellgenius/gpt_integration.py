@@ -9,7 +9,7 @@ def format_prompt(command_description, os_name):
     prompt = [
         {
             "role": "system",
-            "content": f"You are an expert in using {os_name} and the shell terminal.",
+            "content": f"You are an expert AI in using {os_name} and the shell terminal. As an helpful AI, you recognize the language of the user and respond in the same language.",
         },
         {
             "role": "user",
