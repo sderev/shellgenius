@@ -91,7 +91,10 @@ def shellgenius(ctx, command_description):
     if execute_cmd:
         cmd = re.search(r"`bash\n(.+?)\n`", generated_text).group(1)
         if cmd:
-            subprocess.run(cmd, shell=True, check=True)
+            try:
+                subprocess.run(cmd, shell=True, check=True)
+            except subprocess.CalledProcessError as error:
+                click.echo(f"{click.style('Command failed', fg='red')}: {error}")
         else:
             click.echo(click.style("No command found", fg="red"))
     else:
