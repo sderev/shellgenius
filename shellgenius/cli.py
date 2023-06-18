@@ -96,6 +96,6 @@ def shellgenius(ctx, command_description):
             except subprocess.CalledProcessError as error:
                 click.echo(f"{click.style('Command failed', fg='red')}: {error}")
         else:
-            click.echo(click.style("No command found", fg="red"))
+            click.echo(click.style("No command found", fg="blue"))
     else:
         click.echo(click.style("Command not executed", fg="red"))
