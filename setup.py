@@ -8,7 +8,8 @@ with open("requirements.txt", "r", encoding="utf-8") as file:
     requirements = [line.strip() for line in file]
 
 setup(
-    name="shellgenius",
+    name="ShellGenius",
+    description="ShellGenius is a tool to generate shell commands from description in natural language.",
     version="0.1.9",
     packages=find_packages(),
     install_requires=requirements,
@@ -19,5 +20,5 @@ setup(
     },
     long_description=readme,
     long_description_content_type="text/markdown",
-    author="sderev",
+    author="Sébastien De Revière",
 )
