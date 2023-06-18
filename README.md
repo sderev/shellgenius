@@ -17,7 +17,7 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
 1. [Usage](#usage)
     1. [Regarding the Quotes](#regarding-the-quotes)
     1. [Creating an Alias](#creating-an-alias)
-    1. [Make ShellGenius Repond in Your Native Language](#make-shellgenius-repond-in-your-native-language)
+    1. [Make ShellGenius Respond in Your Native Language](#make-shellgenius-respond-in-your-native-language)
 1. [Examples](#examples)
     1. [Remove Duplicate Lines](#remove-duplicate-lines)
     1. [Extract Columns in a File](#extract-columns-in-a-file)
@@ -151,9 +151,9 @@ After adding the alias, you can use ShellGenius by typing `??` instead of `shell
 
 **Note**: Make sure to restart your shell or run `source ~/.bashrc` (or the corresponding file for your shell) for the alias to take effect.
 
-### Make ShellGenius Repond in Your Native Language
+### Make ShellGenius Respond in Your Native Language
 
-You can describe your task in your native language, but ShellGenius might still respond in English. If you'd like ShellGenius to respond in your language, you can add a specific request at the end of your task description. Here's an example:
+You can describe your task in your native language, but ShellGenius might still respond in English. If that happens, you can add a specific request at the end of your task description. Here's an example:
 
 ```
 shellgenius "Description of your task in your own language. Réponds en français."
