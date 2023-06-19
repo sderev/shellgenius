@@ -4,6 +4,8 @@ ShellGenius is an intuitive CLI tool designed to enhance your command-line exper
 
 Powered by ChatGPT, ShellGenius generates accurate commands based on your input and provides step-by-step explanations to help you understand the underlying logic.
 
+ShellGenius is a tool in the [LLM-Toolbox](https://github.com/sderev/llm-toolbox). Consider checking it for finding other handful AI-powered CLI tools, such as `commitgen`, an automatic commit message generator.
+
 <!-- TOC -->
 ## Table of Contents
 
