@@ -36,6 +36,8 @@ https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3f
 
 ### Batch Git Repository Update
 
+![git_pull_evertyhing](https://github.com/sderev/shellgenius/assets/24412384/23d429e0-7281-41fe-8eb2-61770f0a8525)
+
 ### Directory Synchronization
 
 https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9bc4c9303f7
