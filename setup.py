@@ -12,6 +12,7 @@ with open("requirements.txt", "r", encoding="utf-8") as file:
 setup(
     name="ShellGenius",
     description="ShellGenius is a tool to generate shell commands from description in natural language.",
+    license="Apache License 2.0",
     version=VERSION,
     packages=find_packages(),
     install_requires=requirements,
