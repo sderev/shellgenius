@@ -19,13 +19,16 @@ Functions:
         Update the live markdown display with the received chunk of text from the gpt-3.5-turbo AI
         API.
 """
+import click
+import platform
 import re
 import subprocess
-import platform
-import click
+import sys
 from rich.console import Console
-from rich.markdown import Markdown
 from rich.live import Live
+from rich.markdown import Markdown
+import openai
+
 from .gpt_integration import format_prompt, chatgpt_request
 
 
@@ -78,13 +81,22 @@ def shellgenius(ctx, command_description):
     click.echo()
 
     with live:
-        generated_text = chatgpt_request(
-            prompt,
-            stream=True,
-            chunk_callback=rich_markdown_callback,
-        )[0]
-    click.echo()
+        try:
+            generated_text = chatgpt_request(
+                prompt,
+                stream=True,
+                chunk_callback=rich_markdown_callback,
+            )[0]
 
+        except openai.error.RateLimitError as error:
+            click.echo(f"{click.style('Error', fg='red')}: {error}")
+            handle_rate_limit_error()
+            sys.exit(1)
+        except Exception as error:
+            click.echo(f"{click.style('Error', fg='red')}: {error}")
+            sys.exit(1)
+
+    click.echo()
     click.echo(click.style("Be careful with your answer.", fg="blue"))
     execute_cmd = click.confirm("Do you want to execute this command?")
 
@@ -99,3 +111,51 @@ def shellgenius(ctx, command_description):
             click.echo(click.style("No command found", fg="blue"))
     else:
         click.echo(click.style("Command not executed", fg="red"))
+
+
+def handle_rate_limit_error():
+    """
+    Provides guidance on how to handle a rate limit error.
+    """
+    click.echo()
+    click.echo(
+        click.style(
+            (
+                "You might not have set a usage rate limit in your"
+                " OpenAI account settings. "
+            ),
+            fg="blue",
+        )
+    )
+    click.echo(
+        "If that's the case, you can set it"
+        " here:\nhttps://platform.openai.com/account/billing/limits"
+    )
+
+    click.echo()
+    click.echo(
+        click.style(
+            "If you have set a usage rate limit, please try the following steps:",
+            fg="blue",
+        )
+    )
+    click.echo("- Wait a few seconds before trying again.")
+    click.echo()
+    click.echo(
+        "- Reduce your request rate or batch tokens. You can read the"
+        " OpenAI rate limits"
+        " here:\nhttps://platform.openai.com/account/rate-limits"
+    )
+    click.echo()
+    click.echo(
+        "- If you are using the free plan, you can upgrade to the paid"
+        " plan"
+        " here:\nhttps://platform.openai.com/account/billing/overview"
+    )
+    click.echo()
+    click.echo(
+        "- If you are using the paid plan, you can increase your usage"
+        " rate limit"
+        " here:\nhttps://platform.openai.com/account/billing/limits"
+    )
+
