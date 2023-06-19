@@ -2,13 +2,14 @@
 
 ShellGenius is an intuitive CLI tool designed to enhance your command-line experience by turning your task descriptions into efficient shell commands.
 
-Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate commands based on your input and provides step-by-step explanations to help you understand the underlying logic.
+Powered by ChatGPT, ShellGenius generates accurate commands based on your input and provides step-by-step explanations to help you understand the underlying logic.
 
 <!-- TOC -->
 ## Table of Contents
 
 1. [Video Demos](#video-demos)
     1. [Video Frames Extraction](#video-frames-extraction)
+    1. [Batch Git Repository Update](#batch-git-repository-update)
     1. [Directory Synchronization](#directory-synchronization)
     1. [Find and Copy Files with Keywords](#find-and-copy-files-with-keywords)
 1. [Installation](#installation)
@@ -32,6 +33,8 @@ Powered by OpenAI's gpt-3.5-turbo AI model, ShellGenius generates accurate comma
 ### Video Frames Extraction
 
 https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3fdf02fc627f
+
+### Batch Git Repository Update
 
 ### Directory Synchronization
 
