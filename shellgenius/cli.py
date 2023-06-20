@@ -51,6 +51,7 @@ def rich_markdown_callback(chunk: str) -> None:
 
 
 @click.command()
+@click.version_option()
 @click.argument("command_description", type=str, nargs=-1)
 @click.pass_context
 def shellgenius(ctx, command_description):
