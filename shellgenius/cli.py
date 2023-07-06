@@ -19,11 +19,12 @@ Functions:
         Update the live markdown display with the received chunk of text from the gpt-3.5-turbo AI
         API.
 """
-import click
 import platform
 import re
 import subprocess
 import sys
+
+import click
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
@@ -159,4 +160,3 @@ def handle_rate_limit_error():
         " rate limit"
         " here:\nhttps://platform.openai.com/account/billing/limits"
     )
-

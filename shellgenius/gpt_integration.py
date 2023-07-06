@@ -1,7 +1,8 @@
 import os
+import time
+
 import openai
 import tiktoken
-import time
 
 
 def format_prompt(command_description, os_name):
@@ -9,7 +10,11 @@ def format_prompt(command_description, os_name):
     prompt = [
         {
             "role": "system",
-            "content": f"You are an expert AI in using {os_name} and the shell terminal. As an helpful AI, you recognize the language of the user and respond in the same language.",
+            "content": (
+                f"You are an expert AI in using {os_name} and the shell terminal. As an"
+                " helpful AI, you recognize the language of the user and respond in"
+                " the same language."
+            ),
         },
         {
             "role": "user",
@@ -163,10 +168,8 @@ def estimate_prompt_cost(message):
     prices = {
         "gpt-3.5-turbo": 0.0015,
         "gpt-3.5-turbo-0613": 0.0015,
-        "gpt-3.5-turbo-0613": 0.0015,
         "gpt-3.5-turbo-16k": 0.003,
         "gpt-4": 0.03,
-        "gpt-4-0613": 0.03,
         "gpt-4-0613": 0.03,
         "gpt-4-32k": 0.06,
         "gpt-4-32k-0613": 0.06,
