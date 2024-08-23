@@ -2,7 +2,7 @@
 cli.py: Command Line Interface for ShellGenius
 
 This module provides a command-line interface (CLI) for the ShellGenius application, which utilizes
-the gpt-3.5-turbo AI model to generate shell commands based on a given textual description. The
+the gpt-4o-mini AI model to generate shell commands based on a given textual description. The
 generated commands are displayed with explanations, and the user can choose to execute them directly
 from the interface.
 
@@ -13,10 +13,10 @@ received from the AI API.
 Functions:
     * shellgenius(command_description: Tuple[str, ...]) -> None
         Generate and optionally execute a shell command based on the given command description
-        using the gpt-3.5-turbo AI model.
+        using the gpt-4o-mini AI model.
         
     * rich_markdown_callback(chunk: str) -> None
-        Update the live markdown display with the received chunk of text from the gpt-3.5-turbo AI
+        Update the live markdown display with the received chunk of text from the gpt-4o-mini AI
         API.
 """
 import platform

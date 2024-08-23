@@ -50,10 +50,10 @@ command
 
 def chatgpt_request(
     prompt,
-    model="gpt-3.5-turbo-0613",
-    max_tokens=3600,
+    model="gpt-4o-mini",
+    # max_tokens=3600,
     n=1,
-    temperature=0.5,
+    temperature=1,
     stop=None,
     stream=False,
     chunk_callback=None,
@@ -65,7 +65,7 @@ def chatgpt_request(
     response = openai.ChatCompletion.create(
         messages=prompt,
         model=model,
-        max_tokens=max_tokens,
+        # max_tokens=max_tokens,
         n=n,
         temperature=temperature,
         stop=stop,
@@ -128,15 +128,10 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
         )
         return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
     elif model == "gpt-4":
-        print(
-            "Warning: gpt-4 may change over time. Returning num tokens assuming"
-            " gpt-4-0613."
-        )
+        print("Warning: gpt-4 may change over time. Returning num tokens assuming" " gpt-4-0613.")
         return num_tokens_from_messages(messages, model="gpt-4-0613")
     elif model == "gpt-3.5-turbo-0613":
-        tokens_per_message = (
-            4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
-        )
+        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
         tokens_per_name = -1  # if there's a name, the role is omitted
     elif model == "gpt-4-0613":
         tokens_per_message = 3
