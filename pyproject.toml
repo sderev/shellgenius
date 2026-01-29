@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shellgenius"
+version = "0.1.16"
+description = "ShellGenius is a tool to generate shell commands from description in natural language."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Sébastien De Revière"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click",
+    "openai<1.0",
+    "rich",
+    "tiktoken",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.scripts]
+shellgenius = "shellgenius.cli:shellgenius"
+
+[project.urls]
+Homepage = "https://github.com/sderev/shellgenius"
+Repository = "https://github.com/sderev/shellgenius"

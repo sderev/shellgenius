@@ -14,24 +14,24 @@ Functions:
     * shellgenius(command_description: Tuple[str, ...]) -> None
         Generate and optionally execute a shell command based on the given command description
         using the gpt-4o-mini AI model.
-        
+
     * rich_markdown_callback(chunk: str) -> None
         Update the live markdown display with the received chunk of text from the gpt-4o-mini AI
         API.
 """
+
 import platform
 import re
 import subprocess
 import sys
 
 import click
+import openai
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
-import openai
 
-from .gpt_integration import format_prompt, chatgpt_request
-
+from .gpt_integration import chatgpt_request, format_prompt
 
 live_markdown_text = ""
 live_markdown = Markdown(live_markdown_text)
@@ -122,10 +122,7 @@ def handle_rate_limit_error():
     click.echo()
     click.echo(
         click.style(
-            (
-                "You might not have set a usage rate limit in your"
-                " OpenAI account settings. "
-            ),
+            ("You might not have set a usage rate limit in your OpenAI account settings. "),
             fg="blue",
         )
     )
