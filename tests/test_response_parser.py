@@ -2,6 +2,7 @@ import pytest
 from shellgenius.response_parser import (
     ShellGeniusResponseError,
     parse_shellgenius_response,
+    validate_executable_shell_response,
 )
 
 
@@ -47,6 +48,29 @@ def test_parse_shellgenius_response_keeps_embedded_fence_lines_in_command():
 
     assert response.command == "cat <<'EOF' > snippet.md\n```\nhello\n```\nEOF"
     assert response.explanation == "* Writes a markdown snippet."
+
+
+def test_parse_shellgenius_response_keeps_explanation_fenced_blocks_out_of_command():
+    response = parse_shellgenius_response(
+        "```bash\nprintf 'ok'\n```\n\nExplanation:\n* Prints ok.\n* Example output:\n```text\nok\n```"
+    )
+
+    assert response.command == "printf 'ok'"
+    assert response.explanation == "* Prints ok.\n* Example output:\n```text\nok\n```"
+
+
+def test_validate_executable_shell_response_accepts_shell_fences_case_insensitively():
+    response = parse_shellgenius_response("```BASH\npwd\n```")
+
+    validate_executable_shell_response(response)
+
+
+def test_validate_executable_shell_response_rejects_non_shell_fence():
+    response = parse_shellgenius_response("```python\nprint('ok')\n```")
+
+    with pytest.raises(ShellGeniusResponseError):
+        validate_executable_shell_response(response)
+
 
 @pytest.mark.parametrize(
     "response_text",

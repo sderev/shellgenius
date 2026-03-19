@@ -126,7 +126,28 @@ To use ShellGenius, simply type `shellgenius` followed by a description of the t
 shellgenius "description of your task"
 ```
 
-The tool will generate a shell command based on your description, display it with an explanation, and prompt you to confirm if you want to execute the command.
+The tool will generate a shell command based on your description, display it with an explanation, and exit.
+
+To execute the generated command, add `--execute`:
+
+```bash
+shellgenius --execute "description of your task"
+```
+
+When `--execute` is used, ShellGenius honors the fenced shell language. On Unix, `bash`, `sh`, and `zsh` fences run through that shell, while a `shell` fence or no language falls back to `sh`. On Windows, `powershell` fences, `shell`, and no language run through PowerShell. ShellGenius rejects fences it cannot execute on the current platform instead of silently switching shells.
+
+Useful options:
+
+* `-m`, `--model` selects the model.
+* `--no-stream` disables the live Rich view.
+* `-p`, `--plain` prints plain text instead of Rich output.
+* `-c`, `--command-only` prints only the parsed command and cannot be combined with `--execute`.
+* `-x`, `--execute` runs the generated command.
+* `-y`, `--yes` skips the confirmation prompt when used with `--execute`.
+
+When `stdout` is not a TTY, ShellGenius switches to plain buffered output automatically. In non-interactive mode, `--execute` also requires `--yes`.
+
+For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`, which forwards `--run-live -m real` to `pytest` across isolated per-version test environments.
 
 ### Regarding the Quotes
 
@@ -157,6 +178,12 @@ alias '??'='shellgenius'
 ```
 
 After adding the alias, you can use ShellGenius by typing `??` instead of `shellgenius`, making your command-line experience even more seamless and efficient.
+
+An alias also works well for pipe-friendly command output:
+
+```bash
+?? -c "find the ten largest files here"
+```
 
 **Note**: Make sure to restart your shell or run `source ~/.bashrc` (or the corresponding file for your shell) for the alias to take effect.
 
@@ -195,9 +222,6 @@ Explanation:
 * awk is a pattern scanning and processing language
 * '!seen[$0]++' is an awk expression that removes duplicate lines
 * file.txt is the name of the file to process
-
-Be careful with your answer.
-Do you want to execute this command? [Y/n]: y
 ````
 
 ___
@@ -220,9 +244,6 @@ Explanation:
 * -d',' specifies the delimiter as a comma
 * -f1,3,5 specifies the columns to extract
 * data.csv is the input CSV file
-
-Be careful with your answer.
-Do you want to execute this command? [Y/n]: y
 ````
 
 ___
@@ -246,9 +267,6 @@ Explanation:
 * -J option tries to set the file name based on the URL
 * -L option follows redirects if the URL points to a different location
 * https://example.com/file.zip is the URL of the file to download
-
-Be careful with your answer.
-Do you want to execute this command? [Y/n]: y
 ````
 ___
 
@@ -269,9 +287,6 @@ Explanation:
 * wc is a word, line, and byte count utility
 * -l flag counts the number of lines
 * data.csv is the target file
-
-Be careful with your answer.
-Do you want to execute this command? [Y/n]: y
 ````
 
 ## Limitations

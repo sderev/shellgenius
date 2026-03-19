@@ -1,28 +1,10 @@
-"""
-cli.py: Command Line Interface for ShellGenius
-
-This module provides a command-line interface (CLI) for the ShellGenius application, which utilizes
-the gpt-4o-mini AI model to generate shell commands based on a given textual description. The
-generated commands are displayed with explanations, and the user can choose to execute them directly
-from the interface.
-
-The module defines the `shellgenius()` function, which is the main entry point for the CLI command,
-and a `rich_markdown_callback()` function for updating the live markdown display with chunks of text
-received from the AI API.
-
-Functions:
-    * shellgenius(command_description: Tuple[str, ...]) -> None
-        Generate and optionally execute a shell command based on the given command description
-        using the gpt-4o-mini AI model.
-
-    * rich_markdown_callback(chunk: str) -> None
-        Update the live markdown display with the received chunk of text from the gpt-4o-mini AI
-        API.
-"""
+from __future__ import annotations
 
 import platform
+import shutil
 import subprocess
 import sys
+from dataclasses import dataclass, field
 
 import click
 from rich.console import Console
@@ -30,131 +12,255 @@ from rich.live import Live
 from rich.markdown import Markdown
 
 from .gpt_integration import RateLimitError, chatgpt_request, format_prompt
-from .response_parser import ShellGeniusResponseError, parse_shellgenius_response
+from .response_parser import (
+    ParsedShellResponse,
+    ShellGeniusResponseError,
+    parse_shellgenius_response,
+    validate_executable_shell_response,
+)
 
-live_markdown_text = ""
-live_markdown = Markdown(live_markdown_text)
-live = Live(live_markdown, console=Console())
+DEFAULT_MODEL = "gpt-4o-mini"
 
 
-def rich_markdown_callback(chunk: str) -> None:
-    """
-    Update the live markdown display with the received chunk of text from the API.
+@dataclass(frozen=True, slots=True)
+class TTYState:
+    stdin: bool
+    stdout: bool
+    stderr: bool
 
-    Args:
-        chunk (str): A chunk of text received from the API.
-    """
-    global live_markdown, live_markdown_text
-    live_markdown_text += chunk
-    live_markdown = Markdown(live_markdown_text)
-    live.update(live_markdown)
+    @property
+    def can_prompt(self) -> bool:
+        return self.stdin and self.stdout
+
+    @property
+    def can_stream_live(self) -> bool:
+        return self.stdout
+
+
+def get_tty_state() -> TTYState:
+    return TTYState(
+        stdin=sys.stdin.isatty(),
+        stdout=sys.stdout.isatty(),
+        stderr=sys.stderr.isatty(),
+    )
+
+
+@dataclass(slots=True)
+class LiveMarkdownCallback:
+    live: Live
+    chunks: list[str] = field(default_factory=list)
+
+    @property
+    def has_output(self) -> bool:
+        return bool("".join(self.chunks))
+
+    def __call__(self, chunk: str) -> None:
+        if not chunk:
+            return
+        self.chunks.append(chunk)
+        self.live.update(Markdown("".join(self.chunks)))
+
+
+def echo_error(message: str) -> None:
+    click.echo(f"{click.style('Error', fg='red')}: {message}", err=True)
+
+
+def parse_generated_command(generated_text: str) -> ParsedShellResponse:
+    try:
+        parsed_response = parse_shellgenius_response(generated_text)
+        validate_executable_shell_response(parsed_response)
+        return parsed_response
+    except ShellGeniusResponseError as error:
+        raise click.ClickException(str(error) or "No command found.") from error
+
+
+def render_response(
+    generated_text: str,
+    *,
+    tty_state: TTYState,
+    plain: bool,
+    command_only: bool,
+) -> None:
+    if command_only:
+        parsed_response = parse_generated_command(generated_text)
+        click.echo(parsed_response.command)
+        return
+
+    if plain or not tty_state.stdout:
+        click.echo(generated_text.rstrip("\n"))
+        return
+
+    Console().print(Markdown(generated_text))
+
+
+def should_stream_live(
+    *,
+    tty_state: TTYState,
+    plain: bool,
+    command_only: bool,
+    no_stream: bool,
+) -> bool:
+    return tty_state.can_stream_live and not plain and not command_only and not no_stream
+
+
+def resolve_execution_command(parsed_response: ParsedShellResponse) -> list[str]:
+    fence_language = (
+        parsed_response.fence_language.lower() if parsed_response.fence_language else None
+    )
+
+    if platform.system() == "Windows":
+        if fence_language in {None, "powershell", "shell"}:
+            return ["powershell.exe", "-NoProfile", "-Command", parsed_response.command]
+
+        raise click.ClickException(
+            "`--execute` cannot run "
+            f"`{parsed_response.fence_language}` fences on Windows. "
+            "Regenerate with `powershell`, `shell`, or no language."
+        )
+
+    shell_name = "sh" if fence_language in {None, "shell"} else fence_language
+    if shell_name == "powershell":
+        raise click.ClickException(
+            "`--execute` cannot run `powershell` fences on this platform. "
+            "Regenerate with `bash`, `sh`, `zsh`, `shell`, or no language."
+        )
+
+    executable = shutil.which(shell_name)
+    if executable is None:
+        raise click.ClickException(
+            f"`--execute` requires `{shell_name}` to be installed to run this response."
+        )
+
+    return [executable, "-c", parsed_response.command]
+
+
+def run_generated_command(parsed_response: ParsedShellResponse) -> None:
+    subprocess.run(resolve_execution_command(parsed_response), check=True)
 
 
 @click.command()
 @click.version_option()
 @click.argument("command_description", type=str, nargs=-1)
+@click.option(
+    "--model",
+    "-m",
+    default=DEFAULT_MODEL,
+    show_default=True,
+    help="Model to use for the request.",
+)
+@click.option("--no-stream", is_flag=True, help="Disable live streaming.")
+@click.option("--plain", "-p", is_flag=True, help="Print plain text instead of Rich output.")
+@click.option("--command-only", "-c", is_flag=True, help="Print only the generated command.")
+@click.option("--execute", "-x", is_flag=True, help="Execute the generated command.")
+@click.option("--yes", "-y", is_flag=True, help="Skip the execution confirmation prompt.")
 @click.pass_context
-def shellgenius(ctx, command_description):
+def shellgenius(ctx, command_description, model, no_stream, plain, command_only, execute, yes):
     """
-    Generate and optionally execute a shell command based on the given command description.
-
-    Example:
-
-        shellgenius create a new file called example.txt
-
-        `touch example.txt`
-
-        Explanation:
-
-        - touch command is used to create a new file if it doesn't exist
-
-        - example.txt is the name of the new file
-
-        Do you want to execute this command? [Y/n]: y
+    Generate a shell command from a natural-language task description.
     """
     if not command_description:
         click.echo(ctx.get_help())
         return
 
+    if yes and not execute:
+        raise click.UsageError("`--yes` can only be used together with `--execute`.")
+
+    if command_only and execute:
+        raise click.UsageError("`--command-only` cannot be used together with `--execute`.")
+
+    tty_state = get_tty_state()
+    plain = plain or not tty_state.stdout
+
+    if execute and not yes and not tty_state.can_prompt:
+        raise click.UsageError(
+            "`--execute` requires `--yes` when stdin or stdout is not a TTY."
+        )
+
     command_description = " ".join(command_description)
     os_name = "macOS" if platform.system() == "Darwin" else platform.system()
     prompt = format_prompt(command_description, os_name)
-    click.echo()
+    use_live_stream = should_stream_live(
+        tty_state=tty_state,
+        plain=plain,
+        command_only=command_only,
+        no_stream=no_stream,
+    )
 
-    with live:
-        try:
+    try:
+        if use_live_stream:
+            live = Live(Markdown(""), console=Console())
+            live_callback = LiveMarkdownCallback(live)
+            with live:
+                generated_text = chatgpt_request(
+                    prompt,
+                    model=model,
+                    stream=True,
+                    chunk_callback=live_callback,
+                )[0]
+            if live_callback.has_output:
+                click.echo()
+            elif generated_text:
+                render_response(
+                    generated_text,
+                    tty_state=tty_state,
+                    plain=plain,
+                    command_only=command_only,
+                )
+        else:
             generated_text = chatgpt_request(
                 prompt,
-                stream=True,
-                chunk_callback=rich_markdown_callback,
+                model=model,
+                stream=False,
             )[0]
+            render_response(
+                generated_text,
+                tty_state=tty_state,
+                plain=plain,
+                command_only=command_only,
+            )
+    except RateLimitError as error:
+        echo_error(str(error))
+        handle_rate_limit_error()
+        raise SystemExit(1) from error
+    except click.ClickException:
+        raise
+    except Exception as error:
+        echo_error(str(error))
+        raise SystemExit(1) from error
 
-        except RateLimitError as error:
-            click.echo(f"{click.style('Error', fg='red')}: {error}")
-            handle_rate_limit_error()
-            sys.exit(1)
-        except Exception as error:
-            click.echo(f"{click.style('Error', fg='red')}: {error}")
-            sys.exit(1)
+    if not execute:
+        return
 
-    click.echo()
-    click.echo(click.style("Be careful with your answer.", fg="blue"))
-    execute_cmd = click.confirm("Do you want to execute this command?")
+    parsed_response = parse_generated_command(generated_text)
 
-    if execute_cmd:
-        try:
-            parsed_response = parse_shellgenius_response(generated_text)
-        except ShellGeniusResponseError:
-            click.echo(click.style("No command found", fg="blue"))
-            return
+    if not yes and not click.confirm("Execute this command?", default=False):
+        click.echo("Not executed.")
+        return
 
-        try:
-            subprocess.run(parsed_response.command, shell=True, check=True)
-        except subprocess.CalledProcessError as error:
-            click.echo(f"{click.style('Command failed', fg='red')}: {error}")
-    else:
-        click.echo(click.style("Command not executed", fg="red"))
+    try:
+        run_generated_command(parsed_response)
+    except subprocess.CalledProcessError as error:
+        raise click.ClickException(f"Command failed: {error}") from error
 
 
-def handle_rate_limit_error():
-    """
-    Provides guidance on how to handle a rate limit error.
-    """
-    click.echo()
+def handle_rate_limit_error() -> None:
+    click.echo("", err=True)
     click.echo(
         click.style(
-            ("You might not have set a usage rate limit in your OpenAI account settings. "),
+            "You may need to set a usage limit in your OpenAI account settings.",
             fg="blue",
-        )
+        ),
+        err=True,
     )
-    click.echo(
-        "If that's the case, you can set it"
-        " here:\nhttps://platform.openai.com/account/billing/limits"
-    )
+    click.echo("https://platform.openai.com/account/billing/limits", err=True)
 
-    click.echo()
+    click.echo("", err=True)
     click.echo(
-        click.style(
-            "If you have set a usage rate limit, please try the following steps:",
-            fg="blue",
-        )
+        click.style("If the limit is already set, try:", fg="blue"),
+        err=True,
     )
-    click.echo("- Wait a few seconds before trying again.")
-    click.echo()
-    click.echo(
-        "- Reduce your request rate or batch tokens. You can read the"
-        " OpenAI rate limits"
-        " here:\nhttps://platform.openai.com/account/rate-limits"
-    )
-    click.echo()
-    click.echo(
-        "- If you are using the free plan, you can upgrade to the paid"
-        " plan"
-        " here:\nhttps://platform.openai.com/account/billing/overview"
-    )
-    click.echo()
-    click.echo(
-        "- If you are using the paid plan, you can increase your usage"
-        " rate limit"
-        " here:\nhttps://platform.openai.com/account/billing/limits"
-    )
+    click.echo("* Wait a few seconds, then try again.", err=True)
+    click.echo("* Lower your request rate or token usage.", err=True)
+    click.echo("  https://platform.openai.com/account/rate-limits", err=True)
+    click.echo("* Check your billing plan and usage limits.", err=True)
+    click.echo("  https://platform.openai.com/account/billing/overview", err=True)

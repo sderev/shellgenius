@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+EXECUTABLE_FENCE_LANGUAGES = frozenset({"bash", "powershell", "sh", "shell", "zsh"})
+
 
 @dataclass(frozen=True, slots=True)
 class ParsedShellResponse:
@@ -14,6 +16,18 @@ class ParsedShellResponse:
 
 class ShellGeniusResponseError(ValueError):
     """Raised when the model output does not match the expected contract."""
+
+
+def validate_executable_shell_response(response: ParsedShellResponse) -> None:
+    if response.fence_language is None:
+        return
+
+    if response.fence_language.lower() in EXECUTABLE_FENCE_LANGUAGES:
+        return
+
+    raise ShellGeniusResponseError(
+        "Command fence must use `bash`, `sh`, `zsh`, `shell`, `powershell`, or no language."
+    )
 
 
 def parse_shellgenius_response(text: str) -> ParsedShellResponse:
