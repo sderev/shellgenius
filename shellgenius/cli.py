@@ -19,7 +19,7 @@ from .response_parser import (
     validate_executable_shell_response,
 )
 
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gpt-5.4-mini"
 
 
 @dataclass(frozen=True, slots=True)
@@ -172,9 +172,7 @@ def shellgenius(ctx, command_description, model, no_stream, plain, command_only,
     plain = plain or not tty_state.stdout
 
     if execute and not yes and not tty_state.can_prompt:
-        raise click.UsageError(
-            "`--execute` requires `--yes` when stdin or stdout is not a TTY."
-        )
+        raise click.UsageError("`--execute` requires `--yes` when stdin or stdout is not a TTY.")
 
     command_description = " ".join(command_description)
     os_name = "macOS" if platform.system() == "Darwin" else platform.system()

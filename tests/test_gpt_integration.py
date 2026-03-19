@@ -145,7 +145,7 @@ def test_openai_backend_collects_streaming_response_and_calls_chunk_callback():
 
     generated_text, response = backend.create_text_response(
         prompt=format_prompt("list files in the current directory", "Linux"),
-        model="gpt-4o-mini",
+        model="gpt-5.4-mini",
         n=1,
         temperature=1,
         stop=None,
@@ -210,7 +210,7 @@ def test_openai_backend_preserves_mixed_prompt_order_for_responses_api():
 
     generated_text, response = backend.create_text_response(
         prompt=prompt,
-        model="gpt-4o-mini",
+        model="gpt-5.4-mini",
         n=1,
         temperature=1,
         stop=None,
@@ -244,7 +244,7 @@ def test_openai_backend_falls_back_to_chat_completions_for_n_without_stop():
 
     generated_text, response = backend.create_text_response(
         prompt=prompt,
-        model="gpt-4o-mini",
+        model="gpt-5.4-mini",
         n=2,
         temperature=1,
         stop=None,
@@ -258,7 +258,7 @@ def test_openai_backend_falls_back_to_chat_completions_for_n_without_stop():
     assert fake_client.chat.completions.calls == [
         {
             "messages": prompt,
-            "model": "gpt-4o-mini",
+            "model": "gpt-5.4-mini",
             "n": 2,
             "stream": False,
             "temperature": 1,
@@ -300,7 +300,7 @@ def test_openai_backend_propagates_rate_limit_errors():
     with pytest.raises(RateLimitError):
         backend.create_text_response(
             prompt=format_prompt("list files in the current directory", "Linux"),
-            model="gpt-4o-mini",
+            model="gpt-5.4-mini",
             n=1,
             temperature=1,
             stop=None,

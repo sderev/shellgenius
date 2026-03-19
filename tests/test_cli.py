@@ -156,9 +156,7 @@ def test_shellgenius_redirected_stderr_still_streams_and_prompts(monkeypatch):
     calls = []
     executed = []
 
-    monkeypatch.setattr(
-        cli_module, "get_tty_state", lambda: cli_module.TTYState(True, True, False)
-    )
+    monkeypatch.setattr(cli_module, "get_tty_state", lambda: cli_module.TTYState(True, True, False))
     monkeypatch.setattr(cli_module, "Live", DummyLive)
     monkeypatch.setattr(cli_module.shutil, "which", lambda shell_name: f"/mock/{shell_name}")
     monkeypatch.setattr(

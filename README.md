@@ -138,7 +138,7 @@ When `--execute` is used, ShellGenius honors the fenced shell language. On Unix,
 
 Useful options:
 
-* `-m`, `--model` selects the model.
+* `-m`, `--model` selects the model. The default is `gpt-5.4-mini`.
 * `--no-stream` disables the live Rich view.
 * `-p`, `--plain` prints plain text instead of Rich output.
 * `-c`, `--command-only` prints only the parsed command and cannot be combined with `--execute`.
@@ -148,6 +148,8 @@ Useful options:
 When `stdout` is not a TTY, ShellGenius switches to plain buffered output automatically. In non-interactive mode, `--execute` also requires `--yes`.
 
 For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`, which forwards `--run-live -m real` to `pytest` across isolated per-version test environments.
+
+For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`.
 
 ### Regarding the Quotes
 
