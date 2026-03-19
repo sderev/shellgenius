@@ -34,3 +34,23 @@ shellgenius = "shellgenius.cli:shellgenius"
 [project.urls]
 Homepage = "https://github.com/sderev/shellgenius"
 Repository = "https://github.com/sderev/shellgenius"
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+    "scriv[toml]>=1.8,<2",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "real: tests that call external services or require live credentials",
+]
+testpaths = ["tests"]
+
+[tool.scriv]
+changelog = "CHANGELOG.md"
+format = "md"
+fragment_directory = "changelog.d"
+new_fragment_template = "file: new_fragment.md.j2"
+version = "literal: pyproject.toml: project.version"

@@ -12,7 +12,12 @@ uvx ruff check .
 py_versions=(3.10 3.11 3.12 3.13 3.14)
 
 pytest_args=()
-if [ "${GATE_REAL:-}" != "1" ] && [ "${GATE_REAL:-}" != "true" ]; then
+if [ "${GATE_REAL:-}" = "1" ] || [ "${GATE_REAL:-}" = "true" ]; then
+    pytest_args+=("--run-live")
+    if [ -z "${GATE_PYTEST_ARGS:-}" ]; then
+        pytest_args+=("-m" "real")
+    fi
+else
     pytest_args+=("-m" "not real")
 fi
 if [ -n "${GATE_PYTEST_ARGS:-}" ]; then
@@ -23,7 +28,7 @@ fi
 if [ -d "tests" ]; then
     for py in "${py_versions[@]}"; do
         echo "Testing with Python $py..."
-        uv run --python "$py" --group dev -- pytest -q tests/ "${pytest_args[@]}"
+        uv run --isolated --python "$py" --group dev -- pytest -q tests/ "${pytest_args[@]}"
     done
 else
     echo "Warning: no tests/ directory; skipping pytest" >&2
