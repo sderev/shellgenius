@@ -46,7 +46,6 @@ Task:
 def chatgpt_request(
     prompt,
     model="gpt-5.4-mini",
-    # max_tokens=3600,
     n=1,
     temperature=1,
     stop=None,

@@ -1,8 +1,8 @@
 # ShellGenius
 
-ShellGenius is an intuitive CLI tool designed to enhance your command-line experience. By turning your task descriptions into efficient shell commands, ShellGenius makes command-line operations easier and more intuitive than ever before, saving you time and/or reducing the learning curve.
+ShellGenius is a CLI tool that turns natural-language task descriptions into shell commands.
 
-Powered by ChatGPT, ShellGenius not only generates accurate commands based on your input but also provides step-by-step explanations. This way, you not only execute your tasks but also gain a deeper understanding of the commands you're using.
+Powered by OpenAI models, ShellGenius prints a suggested command in a fenced code block, followed by a short explanation. By default it shows the response and exits. With `--execute`, it can run the parsed command for you.
 
 This repository is dedicated to ShellGenius as a standalone tool within the [LLM-Toolbox](https://github.com/sderev/llm-toolbox), a curated suite of AI-powered CLI tools built to modernize your terminal experience. Here, you will find all resources, discussions, and updates specifically related to ShellGenius.
 
@@ -52,7 +52,7 @@ https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9
 
 ## Installation
 
-Ensure you have Python 3.8 or later installed on your system. To install ShellGenius, use the following command:
+Ensure you have Python 3.10 or later installed on your system. To install ShellGenius, use the following command:
 
 ```bash
 python3 -m pip install shellgenius
@@ -120,15 +120,15 @@ Once you have your API key, set it as an environment variable:
 
 ## Usage
 
-To use ShellGenius, simply type `shellgenius` followed by a description of the task you want to perform:
+Run `shellgenius` followed by a description of the task:
 
 ```bash
 shellgenius "description of your task"
 ```
 
-The tool will generate a shell command based on your description, display it with an explanation, and exit.
+The default flow asks the model for a command, prints the response, and exits.
 
-To execute the generated command, add `--execute`:
+To run the generated command, add `--execute`:
 
 ```bash
 shellgenius --execute "description of your task"
@@ -148,8 +148,6 @@ Useful options:
 When `stdout` is not a TTY, ShellGenius switches to plain buffered output automatically. In non-interactive mode, `--execute` also requires `--yes`.
 
 For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`, which forwards `--run-live -m real` to `pytest` across isolated per-version test environments.
-
-For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`.
 
 ### Regarding the Quotes
 
