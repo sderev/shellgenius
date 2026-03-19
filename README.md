@@ -186,8 +186,10 @@ shellgenius "remove duplicate lines from file.txt"
 
 **Output**:
 
-```markdown
+````markdown
+```bash
 awk '!seen[$0]++' file.txt
+```
 
 Explanation:
 * awk is a pattern scanning and processing language
@@ -196,7 +198,7 @@ Explanation:
 
 Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
-```
+````
 
 ___
 
@@ -208,8 +210,10 @@ shellgenius "extract columns 1, 3, and 5 from data.csv"
 
 **Output**:
 
-```markdown
+````markdown
+```bash
 cut -d',' -f1,3,5 data.csv
+```
 
 Explanation:
 * cut command is used to extract portions of lines from files
@@ -219,7 +223,7 @@ Explanation:
 
 Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
-```
+````
 
 ___
 
@@ -231,8 +235,10 @@ shellgenius "download a file from https://example.com/file.zip"
 
 **Output**:
 
-```markdown
+````markdown
+```bash
 curl -OJL https://example.com/file.zip
+```
 
 Explanation:
 * curl is a command-line tool for transferring data using various protocols
@@ -243,7 +249,7 @@ Explanation:
 
 Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
-```
+````
 ___
 
 ### Number of Lines in a File
@@ -254,8 +260,10 @@ shellgenius "count the number of lines in a file called data.csv"
 
 **Output**:
 
-```markdown
+````markdown
+```bash
 wc -l data.csv
+```
 
 Explanation:
 * wc is a word, line, and byte count utility
@@ -264,7 +272,7 @@ Explanation:
 
 Be careful with your answer.
 Do you want to execute this command? [Y/n]: y
-```
+````
 
 ## Limitations
 

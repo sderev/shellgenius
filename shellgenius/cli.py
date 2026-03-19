@@ -21,7 +21,6 @@ Functions:
 """
 
 import platform
-import re
 import subprocess
 import sys
 
@@ -31,6 +30,7 @@ from rich.live import Live
 from rich.markdown import Markdown
 
 from .gpt_integration import RateLimitError, chatgpt_request, format_prompt
+from .response_parser import ShellGeniusResponseError, parse_shellgenius_response
 
 live_markdown_text = ""
 live_markdown = Markdown(live_markdown_text)
@@ -102,14 +102,16 @@ def shellgenius(ctx, command_description):
     execute_cmd = click.confirm("Do you want to execute this command?")
 
     if execute_cmd:
-        cmd = re.search(r"`bash\n(.+?)\n`", generated_text).group(1)
-        if cmd:
-            try:
-                subprocess.run(cmd, shell=True, check=True)
-            except subprocess.CalledProcessError as error:
-                click.echo(f"{click.style('Command failed', fg='red')}: {error}")
-        else:
+        try:
+            parsed_response = parse_shellgenius_response(generated_text)
+        except ShellGeniusResponseError:
             click.echo(click.style("No command found", fg="blue"))
+            return
+
+        try:
+            subprocess.run(parsed_response.command, shell=True, check=True)
+        except subprocess.CalledProcessError as error:
+            click.echo(f"{click.style('Command failed', fg='red')}: {error}")
     else:
         click.echo(click.style("Command not executed", fg="red"))
 

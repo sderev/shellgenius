@@ -13,38 +13,31 @@ def format_prompt(command_description, os_name):
         {
             "role": "system",
             "content": (
-                f"You are an expert AI in using {os_name} and the shell terminal. As an"
-                " helpful AI, you recognize the language of the user and respond in"
-                " the same language."
+                f"You write shell commands for {os_name}. Reply in the same language as the user."
             ),
         },
         {
             "role": "user",
-            "content": f"""
-For the given task in a {os_name} shell, I need you to provide the corresponding command along with a step-by-step explanation. Follow these guidelines for your response:
+            "content": f"""Return the command for this task in a {os_name} shell.
 
-1. Begin your response with the exact shell command.
-2. Follow the command with a step-by-step explanation in bullet point format.
+Rules:
+* Start with exactly one fenced code block for the command.
+* Use this fence info string: `{shell_name}`.
+* Do not write anything before the code block.
+* After the code block, add a short bullet-list explanation.
+* Keep the command concise and correct.
 
-Please note:
-
-* Your response should always start with the shell command. No exceptions.
-
-Here's the required format:
-
+Format:
 ```{shell_name}
-command
+<command>
 ```
 
-### Explanation:
+Explanation:
+* ...
 
-* Step 1: ...
-* Step 2: ...
-* Step 3: ...
-
----
+Task:
 {command_description}
-            """,
+""",
         },
     ]
     return prompt

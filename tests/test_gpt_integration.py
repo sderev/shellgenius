@@ -60,8 +60,10 @@ def test_format_prompt_uses_bash_for_unix_shells():
 
     assert prompt[0]["role"] == "system"
     assert "Linux" in prompt[0]["content"]
+    assert "same language as the user" in prompt[0]["content"]
     assert prompt[1]["role"] == "user"
     assert "```bash" in prompt[1]["content"]
+    assert "Do not write anything before the code block." in prompt[1]["content"]
     assert "list files in the current directory" in prompt[1]["content"]
 
 
