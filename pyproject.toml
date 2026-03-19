@@ -14,7 +14,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "click",
-    "openai<1.0",
+    "openai>=1,<2",
     "rich",
     "tiktoken",
 ]

@@ -1,8 +1,10 @@
-import os
 import time
 
-import openai
 import tiktoken
+
+from .openai_backend import RateLimitError, create_openai_backend
+
+__all__ = ["RateLimitError", "chatgpt_request", "estimated_cost", "format_prompt"]
 
 
 def format_prompt(command_description, os_name):
@@ -59,46 +61,17 @@ def chatgpt_request(
     chunk_callback=None,
 ):
     start_time = time.monotonic_ns()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-
-    # Make the API request
-    response = openai.ChatCompletion.create(
-        messages=prompt,
+    backend = create_openai_backend()
+    generated_text, response = backend.create_text_response(
+        prompt=prompt,
         model=model,
-        # max_tokens=max_tokens,
         n=n,
         temperature=temperature,
         stop=stop,
         stream=stream,
+        chunk_callback=chunk_callback,
     )
-
-    if stream:
-        # Create variables to collect the stream of chunks
-        collected_chunks = []
-        collected_messages = []
-
-        # Iterate through the stream of events
-        for chunk in response:
-            collected_chunks.append(chunk)  # save the event response
-            chunk_message = chunk["choices"][0]["delta"]  # extract the message
-            collected_messages.append(chunk_message)  # save the message
-
-            if chunk_callback:  # call the callback with the chunk message
-                chunk_callback(chunk_message.get("content", ""))
-            # print(chunk_message.get("content", ""), end="")  # stream the message
-        # print()
-        response = collected_chunks
-
-        # Save the time delay and text received
-        response_time = (time.monotonic_ns() - start_time) / 1e9
-        generated_text = "".join([m.get("content", "") for m in collected_messages])
-
-    else:
-        # Extract and save the generated response
-        generated_text = response["choices"][0]["message"]["content"]
-
-        # Save the time delay
-        response_time = (time.monotonic_ns() - start_time) / 1e9
+    response_time = (time.monotonic_ns() - start_time) / 1e9
 
     return (
         generated_text,

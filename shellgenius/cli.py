@@ -26,12 +26,11 @@ import subprocess
 import sys
 
 import click
-import openai
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
 
-from .gpt_integration import chatgpt_request, format_prompt
+from .gpt_integration import RateLimitError, chatgpt_request, format_prompt
 
 live_markdown_text = ""
 live_markdown = Markdown(live_markdown_text)
@@ -90,7 +89,7 @@ def shellgenius(ctx, command_description):
                 chunk_callback=rich_markdown_callback,
             )[0]
 
-        except openai.error.RateLimitError as error:
+        except RateLimitError as error:
             click.echo(f"{click.style('Error', fg='red')}: {error}")
             handle_rate_limit_error()
             sys.exit(1)
