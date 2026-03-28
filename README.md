@@ -1,302 +1,148 @@
 # ShellGenius
 
-ShellGenius is a CLI tool that turns natural-language task descriptions into shell commands.
+ShellGenius turns task descriptions into shell commands.
 
-Powered by OpenAI models, ShellGenius prints a suggested command in a fenced code block, followed by a short explanation. By default it shows the response and exits. With `--execute`, it can run the parsed command for you.
+In a terminal it prints a suggested command with an explanation and asks whether to run it. When `stdout` is piped it prints only the command; when `stdin` is at EOF it shows the response without prompting.
 
-This repository is dedicated to ShellGenius as a standalone tool within the [LLM-Toolbox](https://github.com/sderev/llm-toolbox), a curated suite of AI-powered CLI tools built to modernize your terminal experience. Here, you will find all resources, discussions, and updates specifically related to ShellGenius.
-
-To explore other tools within the [LLM-Toolbox](https://github.com/sderev/llm-toolbox)—such as `commitgen`, the automatic commit message generator—please visit the [LLM-Toolbox](https://github.com/sderev/llm-toolbox) repository.
-
-<!-- TOC -->
-## Table of Contents
-
-1. [Video Demos](#video-demos)
-    1. [Video Frames Extraction](#video-frames-extraction)
-    1. [Batch Git Repository Update](#batch-git-repository-update)
-    1. [Directory Synchronization](#directory-synchronization)
-    1. [Find and Copy Files with Keywords](#find-and-copy-files-with-keywords)
-1. [Installation](#installation)
-    1. [Install via pipx (recommended)](#install-via-pipx-recommended)
-    1. [OpenAI API key](#openai-api-key)
-1. [Usage](#usage)
-    1. [Regarding the Quotes](#regarding-the-quotes)
-    1. [Creating an Alias](#creating-an-alias)
-    1. [Make ShellGenius Respond in Your Native Language](#make-shellgenius-respond-in-your-native-language)
-1. [Examples](#examples)
-    1. [Remove Duplicate Lines](#remove-duplicate-lines)
-    1. [Extract Columns in a File](#extract-columns-in-a-file)
-    1. [Download a File](#download-a-file)
-    1. [Number of Lines in a File](#number-of-lines-in-a-file)
-1. [Limitations](#limitations)
-1. [License](#license)
-<!-- /TOC -->
-
-## Video Demos
-
-### Video Frames Extraction
-
-https://github.com/sderev/shellgenius/assets/24412384/509ee15a-9804-41ad-ba31-3fdf02fc627f
-
-### Batch Git Repository Update
-
-![git_pull_evertyhing](https://github.com/sderev/shellgenius/assets/24412384/23d429e0-7281-41fe-8eb2-61770f0a8525)
-
-### Directory Synchronization
-
-https://github.com/sderev/shellgenius/assets/24412384/c9ad7560-cde3-4c68-aa89-b9bc4c9303f7
-
-### Find and Copy Files with Keywords
-
-![shellgenius_3](https://github.com/sderev/shellgenius/assets/24412384/b52fbcf1-ae5a-4c0e-ae3c-29d2f5aae60a)
+Part of the [LLM-Toolbox](https://github.com/sderev/llm-toolbox).
 
 ## Installation
 
-Ensure you have Python 3.10 or later installed on your system. To install ShellGenius, use the following command:
+Install with [`uv`](https://docs.astral.sh/uv/) (recommended):
+
+```bash
+uv tool install shellgenius
+```
+
+Or with `pip`:
 
 ```bash
 python3 -m pip install shellgenius
 ```
 
-### Install via pipx (recommended)
+## OpenAI API key
 
-[`pipx`](https://pypi.org/project/pipx/) is an alternative package manager for Python applications. It allows you to install and run Python applications in isolated environments, preventing conflicts between dependencies and ensuring that each application uses its own set of packages. I recommend using `pipx` to install ShellGenius.
+ShellGenius requires an OpenAI API key. Obtain one at [OpenAI's website](https://platform.openai.com/settings/organization/api-keys).
 
-**First, install `pipx` if you haven't already**:
+The quickest way to store it:
 
-* On macOS and Linux:
-
-  ```
-  python3 -m pip install --user pipx
-  python3 -m pipx ensurepath
-  ```
-
-Alternatively, you can use your package manager (`brew`, `apt`, etc.).
-
-* On Windows:
-
-  ```
-  py -m pip install --user pipx
-  py -m pipx ensurepath
-  ```
-
-**Once `pipx` is installed, you can install ShellGenius using the following command**:
-
-```
-pipx install shellgenius
+```bash
+shellgenius key set
 ```
 
-### OpenAI API key
+This writes the key to `~/.config/lmt/key.env`. To edit it later:
 
-ShellGenius requires an OpenAI API key to function. You can obtain a key by signing up for an account at [OpenAI's website](https://platform.openai.com/account/api-keys).
+```bash
+shellgenius key edit
+```
 
-Once you have your API key, set it as an environment variable:
+To configure the key manually on macOS or Linux:
 
-* On macOS and Linux:
+```bash
+mkdir -p ~/.config/lmt
+cat <<'EOF' > ~/.config/lmt/key.env
+OPENAI_API_KEY="your-api-key-here"
+EOF
+chmod 600 ~/.config/lmt/key.env
+```
 
-  ```bash
-  export OPENAI_API_KEY="your-api-key-here"
-  ```
+ShellGenius can also use the `OPENAI_API_KEY` environment variable. It checks that first, then `~/.config/lmt/key.env`.
 
-  To avoid having to type it everyday, you can create a file with the key:
+If you want your shell to reuse the same key, load it from the file in your shell startup instead of pasting the raw key into `.bashrc` or `.zshrc`:
 
-  ```bash
-  echo "your-api-key" > ~/.openai-api-key.txt
-  ```
+```bash
+if [ -f "$HOME/.config/lmt/key.env" ]; then
+  . "$HOME/.config/lmt/key.env"
+  export OPENAI_API_KEY
+fi
+```
 
-  **Note:** Remember to replace `"your-api-key"` with your actual API key.
+On Windows (the `shellgenius key set` command also works there):
 
-  And then, you can add this to your shell configuration file (`.bashrc`, `.zshrc`, etc.):
-
-    ```bash
-    export OPENAI_API_KEY="$(cat ~/.openai-api-key.txt)"
-    ```
-
-* On Windows:
-
-  ```
-  setx OPENAI_API_KEY your_key
-  ```
+```powershell
+setx OPENAI_API_KEY your_key
+```
 
 ## Usage
 
-Run `shellgenius` followed by a description of the task:
+Generate a command:
 
 ```bash
-shellgenius "description of your task"
+shellgenius "list the ten largest files here"
 ```
 
-The default flow asks the model for a command, prints the response, and exits.
-
-To run the generated command, add `--execute`:
+When `stdout` is not a TTY, ShellGenius prints only the generated command so it stays safe to pipe:
 
 ```bash
-shellgenius --execute "description of your task"
+cmd=$(shellgenius "find all TODO comments")
+shellgenius "find all TODO comments" | bash
+shellgenius "list all .log files" | bash | xargs wc -l
 ```
 
-When `--execute` is used, ShellGenius honors the fenced shell language. On Unix, `bash`, `sh`, and `zsh` fences run through that shell, while a `shell` fence or no language falls back to `sh`. On Windows, `powershell` fences, `shell`, and no language run through PowerShell. ShellGenius rejects fences it cannot execute on the current platform instead of silently switching shells.
+Use `--raw` for the full response as plain text. Use `--rich` to force Rich formatting in a terminal; in a pipe it falls back to plain text. Use `--cmd` to print only the command in any context.
 
-Useful options:
+## Options
 
-* `-m`, `--model` selects the model. The default is `gpt-5.4-mini`.
-* `--no-stream` disables the live Rich view.
-* `-p`, `--plain` prints plain text instead of Rich output.
-* `-c`, `--command-only` prints only the parsed command and cannot be combined with `--execute`.
-* `-x`, `--execute` runs the generated command.
-* `-y`, `--yes` skips the confirmation prompt when used with `--execute`.
+| Flag | Effect |
+|---|---|
+| `-m`, `--model` | Model to use (default: `gpt-5.4-mini`). Run `shellgenius models` to list options. |
+| `--no-stream` | Disable live Rich streaming. |
+| `-r`, `--raw` | Print the full response as plain text. |
+| `-R`, `--rich` | Force Rich formatting in a TTY; fall back to plain text otherwise. |
+| `--cmd` | Print only the command, even in a TTY. |
+| `--tokens` | Print prompt token count and estimated cost, then exit. |
 
-When `stdout` is not a TTY, ShellGenius switches to plain buffered output automatically. In non-interactive mode, `--execute` also requires `--yes`.
+## Shell Completion
 
-For local development, mocked tests run by default. Opt in to real OpenAI smoke tests with `uv run pytest --run-live -m real` or `GATE_REAL=1 gate`, which forwards `--run-live -m real` to `pytest` across isolated per-version test environments.
-
-### Regarding the Quotes
-
-The quotes are not necessary when the task description does not contain a single quote, or a special character.
-
-**Not necessary**:
+Bash:
 
 ```bash
-shellgenius compile and run myprogramm.cpp
+eval "$(_SHELLGENIUS_COMPLETE=bash_source shellgenius)"
 ```
 
-**Necessary**:
+Zsh:
 
 ```bash
-shellgenius "find and replace 'oldtext' with 'newtext' in *.txt files"
+eval "$(_SHELLGENIUS_COMPLETE=zsh_source shellgenius)"
 ```
 
-### Creating an Alias
+If you prefer checked-in scripts, this repo also includes `completion/_complete_shellgenius.bash` and `completion/_complete_shellgenius.zsh`.
 
-To further enhance the usability of ShellGenius, even with the presence of autocompletion, **I recommend to create an alias** for effortless access. One suggested alias is `??`.
+## Model Selection
 
-By defining an alias, you can invoke ShellGenius simply by typing `??` followed by your task description, eliminating the need to type the full command each time.
-
-To create the alias, add the following line to your shell configuration file (`~/.bashrc`, `~/.bash_profile`, or `~/.zshrc`, depending on your shell):
+List supported models and their short aliases:
 
 ```bash
-alias '??'='shellgenius'
+shellgenius models
 ```
 
-After adding the alias, you can use ShellGenius by typing `??` instead of `shellgenius`, making your command-line experience even more seamless and efficient.
-
-An alias also works well for pipe-friendly command output:
+Use an alias with `-m`:
 
 ```bash
-?? -c "find the ten largest files here"
+shellgenius -m 4.1 "list the ten largest files"
+shellgenius -m 5.4-mini "find all TODO comments"
 ```
 
-**Note**: Make sure to restart your shell or run `source ~/.bashrc` (or the corresponding file for your shell) for the alias to take effect.
+## Customizing Colors
 
-### Make ShellGenius Respond in Your Native Language
+ShellGenius reads `~/.config/lmt/config.json` for two optional keys:
 
-You can describe your task in your native language, but ShellGenius might still respond in English. If that happens, you can add a specific request at the end of your task description. Here's an example:
+* `code_block_theme` for fenced code blocks. Any [Pygments style](https://pygments.org/styles/) name works, plus the built-in `alabaster` theme.
+* `inline_code_theme` for inline code. Use any Rich style string, such as `"#325cc0 on #f0f0f0"`.
 
-```
-shellgenius "Description of your task in your own language. Réponds en français."
-```
+Example:
 
-In the above command, "Réponds en français" is a request for ShellGenius to respond in French. You can replace this with a similar phrase in your language. For example, if you want the response in German, you can use "Antworte auf Deutsch". ShellGenius will then oblige and respond in the requested language.
-
-```
-shellgenius "Erstellt eine Datei. Antworte auf Deutsch."
-```
-
-## Examples
-
-Here are some examples of ShellGenius in action:
-
-### Remove Duplicate Lines
-
-```bash
-shellgenius "remove duplicate lines from file.txt"
+```json
+{
+  "code_block_theme": "alabaster",
+  "inline_code_theme": "#325cc0 on #f0f0f0"
+}
 ```
 
-**Output**:
-
-````markdown
-```bash
-awk '!seen[$0]++' file.txt
-```
-
-Explanation:
-* awk is a pattern scanning and processing language
-* '!seen[$0]++' is an awk expression that removes duplicate lines
-* file.txt is the name of the file to process
-````
-
-___
-
-### Extract Columns in a File
-
-```bash
-shellgenius "extract columns 1, 3, and 5 from data.csv"
-```
-
-**Output**:
-
-````markdown
-```bash
-cut -d',' -f1,3,5 data.csv
-```
-
-Explanation:
-* cut command is used to extract portions of lines from files
-* -d',' specifies the delimiter as a comma
-* -f1,3,5 specifies the columns to extract
-* data.csv is the input CSV file
-````
-
-___
-
-### Download a File
-
-```bash
-shellgenius "download a file from https://example.com/file.zip"
-```
-
-**Output**:
-
-````markdown
-```bash
-curl -OJL https://example.com/file.zip
-```
-
-Explanation:
-* curl is a command-line tool for transferring data using various protocols
-* -O option saves the downloaded file with its original name
-* -J option tries to set the file name based on the URL
-* -L option follows redirects if the URL points to a different location
-* https://example.com/file.zip is the URL of the file to download
-````
-___
-
-### Number of Lines in a File
-
-```bash
-shellgenius "count the number of lines in a file called data.csv"
-```
-
-**Output**:
-
-````markdown
-```bash
-wc -l data.csv
-```
-
-Explanation:
-* wc is a word, line, and byte count utility
-* -l flag counts the number of lines
-* data.csv is the target file
-````
-
-## Limitations
-
-ShellGenius is powered by an AI model and may not always generate the most efficient or accurate commands. Exercise caution when executing commands, especially when working with sensitive data or critical systems.
+These settings affect Rich output only. Raw (`--raw`) and command-only (`--cmd`) output are unchanged. If the config file is missing or unreadable, Rich's built-in defaults are used.
 
 ## License
 
 ShellGenius is released under the [Apache 2.0 Licence](LICENSE).
-
-___
 
 <https://github.com/sderev/shellgenius>

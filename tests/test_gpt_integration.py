@@ -3,10 +3,13 @@ from types import SimpleNamespace
 import httpx
 import pytest
 from openai import RateLimitError
+
+import shellgenius.api_key as api_key_module
 from shellgenius.gpt_integration import (
     chatgpt_request,
-    estimated_cost,
+    estimate_prompt_cost,
     format_prompt,
+    num_tokens_from_messages,
 )
 from shellgenius.openai_backend import (
     OpenAIResponsesBackend,
@@ -14,20 +17,7 @@ from shellgenius.openai_backend import (
 )
 
 
-class FakeResponsesAPI:
-    def __init__(self, *, response=None, error=None):
-        self._response = response
-        self._error = error
-        self.calls = []
-
-    def create(self, **kwargs):
-        self.calls.append(kwargs)
-        if self._error is not None:
-            raise self._error
-        return self._response
-
-
-class FakeChatCompletionsAPI:
+class FakeCreateAPI:
     def __init__(self, *, response=None, error=None):
         self._response = response
         self._error = error
@@ -49,9 +39,9 @@ class FakeOpenAIClient:
         chat_response=None,
         chat_error=None,
     ):
-        self.responses = FakeResponsesAPI(response=response, error=error)
+        self.responses = FakeCreateAPI(response=response, error=error)
         self.chat = SimpleNamespace(
-            completions=FakeChatCompletionsAPI(response=chat_response, error=chat_error)
+            completions=FakeCreateAPI(response=chat_response, error=chat_error)
         )
 
 
@@ -266,7 +256,7 @@ def test_openai_backend_falls_back_to_chat_completions_for_n_without_stop():
     ]
 
 
-@pytest.mark.parametrize("model", ["gpt-5.4-mini", "gpt-5.4"])
+@pytest.mark.parametrize("model", ["gpt-5.4-mini", "gpt-5.4", "GPT-5.4", " gpt-5.4-mini "])
 def test_openai_backend_rejects_stop_for_gpt_5_4_models_before_api_call(model):
     fake_client = FakeOpenAIClient(response=SimpleNamespace(output_text="unused"))
     backend = OpenAIResponsesBackend(client=fake_client)
@@ -309,5 +299,35 @@ def test_openai_backend_propagates_rate_limit_errors():
         )
 
 
-def test_estimated_cost_formats_to_six_decimals():
-    assert estimated_cost(1234, 0.0015) == "0.001851"
+def test_num_tokens_from_messages_counts_standard_prompt():
+    messages = [
+        {"role": "system", "content": "You are helpful."},
+        {"role": "user", "content": "Hello."},
+    ]
+    count = num_tokens_from_messages(messages)
+    assert isinstance(count, int)
+    assert count > 0
+
+
+def test_estimate_prompt_cost_returns_string_for_known_model():
+    messages = format_prompt("list files", "Linux")
+    cost = estimate_prompt_cost(messages, "gpt-5.4-mini")
+    assert cost is not None
+    assert cost.startswith("0.")
+
+
+def test_estimate_prompt_cost_returns_none_for_unknown_model():
+    messages = format_prompt("list files", "Linux")
+    assert estimate_prompt_cost(messages, "unknown-model") is None
+
+
+def test_openai_backend_exits_cleanly_when_key_file_has_invalid_utf8(monkeypatch, tmp_path, capsys):
+    key_file = tmp_path / "key.env"
+    key_file.write_bytes(b"\xff")
+    monkeypatch.setattr(api_key_module, "KEY_FILE_PATH", key_file)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    with pytest.raises(SystemExit, match="1"):
+        OpenAIResponsesBackend()
+
+    assert "No OpenAI API key found." in capsys.readouterr().err

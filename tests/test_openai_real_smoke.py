@@ -1,6 +1,6 @@
-import os
-
 import pytest
+
+from shellgenius.api_key import get_api_key
 from shellgenius.cli import DEFAULT_MODEL
 from shellgenius.gpt_integration import chatgpt_request, format_prompt
 
@@ -8,8 +8,11 @@ pytestmark = pytest.mark.real
 
 
 def _require_openai_api_key():
-    if not os.getenv("OPENAI_API_KEY"):
-        pytest.skip("OPENAI_API_KEY is required for real smoke tests")
+    if not get_api_key():
+        pytest.skip(
+            "An OpenAI API key in OPENAI_API_KEY or ~/.config/lmt/key.env "
+            "is required for real smoke tests"
+        )
 
 
 def _assert_shellgenius_response_shape(text: str) -> None:
