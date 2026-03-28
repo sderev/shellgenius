@@ -1,4 +1,5 @@
 import pytest
+
 from shellgenius.response_parser import (
     ShellGeniusResponseError,
     parse_shellgenius_response,
