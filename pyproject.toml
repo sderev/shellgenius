@@ -32,6 +32,9 @@ classifiers = [
 [project.scripts]
 shellgenius = "shellgenius.cli:shellgenius"
 
+[project.entry-points."pygments.styles"]
+alabaster = "shellgenius.theme:AlabasterStyle"
+
 [project.urls]
 Homepage = "https://github.com/sderev/shellgenius"
 Repository = "https://github.com/sderev/shellgenius"

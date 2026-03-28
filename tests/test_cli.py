@@ -899,6 +899,45 @@ def test_live_streaming_fallback_rich_path_keeps_single_leading_blank_line(monke
     assert not result.output.startswith("\n\n")
 
 
+# -- lmterminal theme integration ---------------------------------------------
+
+
+def test_render_response_rich_path_uses_theme(monkeypatch):
+    console_calls = []
+    markdown_calls = []
+
+    class FakeConsole:
+        def print(self, _md):
+            pass
+
+    from shellgenius import theme as theme_mod
+
+    theme = LmtTheme(code_block_theme="zenburn", inline_code_theme="red on white")
+
+    def spy_console(t):
+        console_calls.append(t)
+        return FakeConsole()
+
+    def spy_markdown(text, t):
+        markdown_calls.append(t)
+        return theme_mod.make_markdown(text, t)
+
+    monkeypatch.setattr(cli_module, "make_console", spy_console)
+    monkeypatch.setattr(cli_module, "make_markdown", spy_markdown)
+
+    cli_module.render_response(
+        "hello",
+        tty_state=cli_module.TTYState(True, True, True),
+        raw=False,
+        rich_flag=False,
+        command_only=False,
+        theme=theme,
+    )
+
+    assert console_calls == [theme]
+    assert markdown_calls == [theme]
+
+
 # -- missing coverage ----------------------------------------------------------
 
 
