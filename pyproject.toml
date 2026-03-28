@@ -38,6 +38,7 @@ Repository = "https://github.com/sderev/shellgenius"
 [dependency-groups]
 dev = [
     "pytest>=8,<9",
+    "ruff==0.15.8",
     "scriv[toml]>=1.8,<2",
 ]
 
@@ -47,6 +48,9 @@ markers = [
     "real: tests that call external services or require live credentials",
 ]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
 
 [tool.scriv]
 changelog = "CHANGELOG.md"
