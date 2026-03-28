@@ -1016,3 +1016,221 @@ def test_shellgenius_executes_no_fence_language_with_sh(monkeypatch):
 
     assert result.exit_code == 0
     assert calls == [((["/mock/sh", "-c", "printf 'ok'"],), {"check": True})]
+
+
+# -- model aliases and `models` command ----------------------------------------
+
+
+def test_shellgenius_models_lists_all_valid_models():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["models"])
+
+    assert result.exit_code == 0
+    for model in cli_module.VALID_MODELS:
+        assert model in result.output
+
+
+def test_shellgenius_models_shows_aliases():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["models"])
+
+    assert result.exit_code == 0
+    assert "Alias: 4.1\n" in result.output
+    assert "Alias: 5.4-mini\n" in result.output
+
+
+def test_shellgenius_alias_resolves_to_canonical(monkeypatch):
+    runner = CliRunner()
+    calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *args, **kwargs: calls.append(kwargs) or (response_text(), 0, object()),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, ["--model", "4.1", "print", "ok"])
+
+    assert result.exit_code == 0
+    assert calls == [{"model": "gpt-4.1", "stream": False}]
+
+
+def test_shellgenius_alias_resolves_case_insensitively(monkeypatch):
+    runner = CliRunner()
+    calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *args, **kwargs: calls.append(kwargs) or (response_text(), 0, object()),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, ["--model", "GPT-4.1", "print", "ok"])
+
+    assert result.exit_code == 0
+    assert calls == [{"model": "gpt-4.1", "stream": False}]
+
+
+def test_shellgenius_invalid_model_fails_with_hint():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["--model", "invalid", "print", "ok"])
+
+    assert result.exit_code != 0
+    assert "Invalid value for '--model' / '-m': Invalid model name." in result.output
+    assert "Use shellgenius models to list supported models and aliases." in result.output
+
+
+def test_shellgenius_invalid_model_styles_message_and_command():
+    runner = CliRunner()
+
+    result = runner.invoke(
+        cli_module.shellgenius,
+        ["--model", "invalid", "print", "ok"],
+        color=True,
+    )
+
+    assert result.exit_code != 0
+    assert "\x1b[31mInvalid model name.\x1b[0m" in result.output
+    assert "\x1b[31mUse \x1b[0m\x1b[34mshellgenius models\x1b[0m" in result.output
+
+
+def test_shellgenius_routes_leaf_option_value_sequences_to_subcommand_parser(monkeypatch):
+    runner = CliRunner()
+    chatgpt_calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *args, **kwargs: chatgpt_calls.append((args, kwargs)),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, ["models", "-m", "gpt-5"])
+
+    assert result.exit_code == 2
+    assert "No such option: -m" in result.output
+    assert chatgpt_calls == []
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["models", "for", "me"],
+    ],
+)
+def test_shellgenius_keeps_malformed_leaf_subcommands_on_subcommand_path(monkeypatch, args):
+    runner = CliRunner()
+    prompts = []
+    chatgpt_calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "format_prompt",
+        lambda *call_args, **call_kwargs: prompts.append((call_args, call_kwargs)),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *call_args, **call_kwargs: chatgpt_calls.append((call_args, call_kwargs)),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, args)
+
+    assert result.exit_code == 2
+    assert "Got unexpected extra argument" in result.output
+    assert prompts == []
+    assert chatgpt_calls == []
+
+
+def test_shellgenius_models_help_shows_subcommand_help():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["models", "--help"])
+
+    assert result.exit_code == 0
+    assert "List supported models" in result.output
+
+
+# -- `--tokens` flag -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "extra_args",
+    [
+        [],
+        ["--model", "gpt-5.4"],
+    ],
+)
+def test_shellgenius_tokens_prints_count_and_cost_without_api_call(monkeypatch, extra_args):
+    runner = CliRunner()
+    calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *args, **kwargs: calls.append(kwargs) or (response_text(), 0, object()),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, ["--tokens", *extra_args, "print", "ok"])
+
+    assert result.exit_code == 0
+    assert calls == []
+    assert "Prompt tokens:" in result.output
+    assert "Estimated cost for" in result.output
+    assert "$" in result.output
+
+
+def test_shellgenius_tokens_has_no_short_flag():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["-t", "print", "ok"])
+
+    assert result.exit_code != 0
+    assert "No such option: -t" in result.output
+
+
+def test_shellgenius_tokens_cost_unavailable_for_unknown_price(monkeypatch):
+    runner = CliRunner()
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(cli_module, "estimate_prompt_cost", lambda _msgs, _model: None)
+
+    result = runner.invoke(cli_module.shellgenius, ["--tokens", "print", "ok"])
+
+    assert result.exit_code == 0
+    assert "Prompt tokens:" in result.output
+    assert "Cost unavailable" in result.output
+
+
+# -- help includes models ------------------------------------------------------
+
+
+def test_shellgenius_help_lists_models_command():
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, ["--help"])
+
+    assert result.exit_code == 0
+    assert "[COMMAND_DESCRIPTION]" in result.output
+    assert "--model" in result.output
+    assert "models" in result.output
+    assert "shellgenius prompt --help" in result.output

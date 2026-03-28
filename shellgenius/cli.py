@@ -12,7 +12,13 @@ import click
 from click_default_group import DefaultGroup
 from rich.live import Live
 
-from .gpt_integration import RateLimitError, chatgpt_request, format_prompt
+from .gpt_integration import (
+    RateLimitError,
+    chatgpt_request,
+    estimate_prompt_cost,
+    format_prompt,
+    num_tokens_from_messages,
+)
 from .response_parser import (
     ParsedShellResponse,
     ShellGeniusResponseError,
@@ -22,6 +28,40 @@ from .response_parser import (
 from .theme import LmtTheme, load_lmt_theme, make_console, make_markdown
 
 DEFAULT_MODEL = "gpt-5.4-mini"
+
+VALID_MODELS: dict[str, tuple[str, ...]] = {
+    "gpt-4.1": ("4.1",),
+    "gpt-4.1-mini": ("4.1-mini",),
+    "gpt-4.1-nano": ("4.1-nano",),
+    "gpt-4o": ("4o",),
+    "gpt-4o-mini": ("4o-mini",),
+    "gpt-5": ("5",),
+    "gpt-5-mini": ("5-mini",),
+    "gpt-5-nano": ("5-nano",),
+    "gpt-5.4": ("5.4",),
+    "gpt-5.4-mini": ("5.4-mini",),
+    "gpt-5.4-nano": ("5.4-nano",),
+}
+
+
+def validate_model_name(ctx, param, value):
+    """Resolve aliases and validate model names."""
+    name = value.lower()
+    for canonical, aliases in VALID_MODELS.items():
+        if name == canonical or name in aliases:
+            return canonical
+    raise click.BadParameter(
+        f"{click.style('Invalid model name.', fg='red')}\n"
+        f"{click.style('Use ', fg='red')}"
+        f"{click.style('shellgenius models', fg='blue')}"
+        f"{click.style(' to list supported models and aliases.', fg='red')}"
+    )
+
+
+def _list_models() -> None:
+    for model, aliases in VALID_MODELS.items():
+        click.echo(model)
+        click.echo(f"  Alias: {', '.join(aliases)}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -380,7 +420,15 @@ class ShellGeniusGroup(DefaultGroup):
 def shellgenius():
     """
     Generate a shell command from a natural-language task description.
+
+    Run ``shellgenius models`` to list supported models and aliases.
     """
+
+
+@shellgenius.command()
+def models():
+    """List supported models and their aliases."""
+    _list_models()
 
 
 @shellgenius.command(cls=DefaultCommand)
@@ -390,7 +438,8 @@ def shellgenius():
     "-m",
     default=DEFAULT_MODEL,
     show_default=True,
-    help="Model to use for the request.",
+    callback=validate_model_name,
+    help="Model to use (run `shellgenius models` to list options).",
 )
 @click.option("--no-stream", is_flag=True, help="Disable live streaming.")
 @click.option("--raw", "-r", is_flag=True, help="Print plain text instead of Rich output.")
@@ -404,6 +453,9 @@ def shellgenius():
 @click.option("--plain", "-p", is_flag=True, hidden=True)
 @click.option("--cmd", "command_only", is_flag=True, help="Print only the generated command.")
 @click.option("--command-only", "command_only", is_flag=True, hidden=True)
+@click.option(
+    "--tokens", is_flag=True, help="Print prompt token count and estimated cost, then exit."
+)
 @click.pass_context
 def prompt(
     ctx,
@@ -414,8 +466,12 @@ def prompt(
     rich_flag,
     plain,
     command_only,
+    tokens,
 ):
-    """Generate a shell command from a natural-language task description."""
+    """Generate a shell command from a natural-language task description.
+
+    Other commands: ``shellgenius models``.
+    """
     if not command_description:
         click.echo(ctx.get_help())
         return
@@ -438,6 +494,19 @@ def prompt(
     command_description = " ".join(command_description)
     os_name = "macOS" if platform.system() == "Darwin" else platform.system()
     messages = format_prompt(command_description, os_name)
+
+    if tokens:
+        token_count = num_tokens_from_messages(messages, model)
+        cost = estimate_prompt_cost(messages, model)
+        click.echo(f"Prompt tokens: {click.style(str(token_count), fg='yellow')}")
+        if cost is not None:
+            click.echo(
+                f"Estimated cost for {click.style(model, fg='blue')}:"
+                f" {click.style(f'${cost}', fg='yellow')}"
+            )
+        else:
+            click.echo(f"Cost unavailable for {click.style(model, fg='blue')}.")
+        return
 
     use_live_stream = should_stream_live(
         tty_state=tty_state,
