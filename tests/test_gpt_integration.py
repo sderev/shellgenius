@@ -4,6 +4,7 @@ import httpx
 import pytest
 from openai import RateLimitError
 
+import shellgenius.api_key as api_key_module
 from shellgenius.gpt_integration import (
     chatgpt_request,
     estimate_prompt_cost,
@@ -318,3 +319,15 @@ def test_estimate_prompt_cost_returns_string_for_known_model():
 def test_estimate_prompt_cost_returns_none_for_unknown_model():
     messages = format_prompt("list files", "Linux")
     assert estimate_prompt_cost(messages, "unknown-model") is None
+
+
+def test_openai_backend_exits_cleanly_when_key_file_has_invalid_utf8(monkeypatch, tmp_path, capsys):
+    key_file = tmp_path / "key.env"
+    key_file.write_bytes(b"\xff")
+    monkeypatch.setattr(api_key_module, "KEY_FILE_PATH", key_file)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    with pytest.raises(SystemExit, match="1"):
+        OpenAIResponsesBackend()
+
+    assert "No OpenAI API key found." in capsys.readouterr().err

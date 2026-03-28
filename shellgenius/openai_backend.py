@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-import os
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+import click
 from openai import OpenAI, RateLimitError
+
+from .api_key import get_api_key
 
 PromptMessage = Mapping[str, str]
 ChunkCallback = Callable[[str], None]
@@ -39,13 +42,27 @@ def prepare_prompt_for_responses_api(prompt: Sequence[PromptMessage]) -> Prepare
             }
         )
 
-    input_payload: str | list[dict[str, str]] = input_messages if input_messages else ""
-    return PreparedResponsesRequest(instructions=None, input=input_payload)
+    return PreparedResponsesRequest(instructions=None, input=input_messages)
 
 
 class OpenAIResponsesBackend:
     def __init__(self, client: OpenAI | None = None) -> None:
-        self._client = client or OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        if client is not None:
+            self._client = client
+            return
+
+        api_key = get_api_key()
+        if not api_key:
+            click.secho("Error: ", fg="red", nl=False, err=True)
+            click.echo("No OpenAI API key found.", err=True)
+            click.echo(
+                "Set the OPENAI_API_KEY environment variable, "
+                "or run: " + click.style("shellgenius key set", fg="blue"),
+                err=True,
+            )
+            sys.exit(1)
+
+        self._client = OpenAI(api_key=api_key)
 
     def create_text_response(
         self,

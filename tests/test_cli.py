@@ -1233,4 +1233,80 @@ def test_shellgenius_help_lists_models_command():
     assert "[COMMAND_DESCRIPTION]" in result.output
     assert "--model" in result.output
     assert "models" in result.output
+    assert "key" in result.output
     assert "shellgenius prompt --help" in result.output
+
+
+# -- key subcommand routing ----------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("args", "description"),
+    [
+        (["key", "rotation"], "key rotation"),
+    ],
+)
+def test_shellgenius_routes_ambiguous_top_level_commands_to_prompt(
+    monkeypatch,
+    args,
+    description,
+):
+    runner = CliRunner()
+    prompts = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "format_prompt",
+        lambda command_description, os_name: (
+            prompts.append((command_description, os_name))
+            or [{"role": "user", "content": command_description}]
+        ),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *args, **kwargs: (response_text(), 0, object()),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, args)
+
+    assert result.exit_code == 0
+    assert prompts == [(description, "Linux")]
+    assert result.output == "printf 'ok'\n"
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["key", "set", "permissions"],
+        ["key", "set", "sk-test"],
+    ],
+)
+def test_shellgenius_keeps_malformed_key_subcommands_on_subcommand_path(monkeypatch, args):
+    runner = CliRunner()
+    prompts = []
+    chatgpt_calls = []
+
+    monkeypatch.setattr(
+        cli_module, "get_tty_state", lambda: cli_module.TTYState(False, False, False)
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "format_prompt",
+        lambda *call_args, **call_kwargs: prompts.append((call_args, call_kwargs)),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "chatgpt_request",
+        lambda *call_args, **call_kwargs: chatgpt_calls.append((call_args, call_kwargs)),
+    )
+
+    result = runner.invoke(cli_module.shellgenius, args)
+
+    assert result.exit_code == 2
+    assert "Got unexpected extra argument" in result.output
+    assert prompts == []
+    assert chatgpt_calls == []

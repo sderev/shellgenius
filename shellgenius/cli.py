@@ -12,6 +12,7 @@ import click
 from click_default_group import DefaultGroup
 from rich.live import Live
 
+from .api_key import edit_key, set_key
 from .gpt_integration import (
     RateLimitError,
     chatgpt_request,
@@ -431,6 +432,23 @@ def models():
     _list_models()
 
 
+@shellgenius.group()
+def key():
+    """Manage the OpenAI API key."""
+
+
+@key.command(name="set")
+def key_set():
+    """Set the OpenAI API key."""
+    set_key()
+
+
+@key.command(name="edit")
+def key_edit():
+    """Edit the OpenAI API key."""
+    edit_key()
+
+
 @shellgenius.command(cls=DefaultCommand)
 @click.argument("command_description", type=str, nargs=-1)
 @click.option(
@@ -470,7 +488,7 @@ def prompt(
 ):
     """Generate a shell command from a natural-language task description.
 
-    Other commands: ``shellgenius models``.
+    Other commands: ``shellgenius models``, ``shellgenius key set``.
     """
     if not command_description:
         click.echo(ctx.get_help())
