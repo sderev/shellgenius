@@ -26,7 +26,7 @@ from .response_parser import (
     parse_shellgenius_response,
     validate_executable_shell_response,
 )
-from .theme import LmtTheme, load_lmt_theme, make_console, make_markdown
+from .theme import LmtTheme, load_lmt_theme, make_console, make_renderable
 
 DEFAULT_MODEL = "gpt-5.4-mini"
 
@@ -192,7 +192,7 @@ class LiveMarkdownCallback:
         if not chunk:
             return
         self.chunks.append(chunk)
-        self.live.update(make_markdown("".join(self.chunks), self.theme))
+        self.live.update(make_renderable("".join(self.chunks), self.theme))
 
 
 def echo_error(message: str) -> None:
@@ -236,7 +236,7 @@ def render_response(
     if tty_state.stdout and (rich_flag or not raw):
         if leading_blank_line:
             click.echo()
-        make_console(theme).print(make_markdown(generated_text, theme))
+        make_console(theme).print(make_renderable(generated_text, theme))
         return
 
     click.echo(generated_text.rstrip("\n"))
@@ -538,7 +538,7 @@ def prompt(
     try:
         if use_live_stream:
             console = make_console(theme)
-            live = Live(make_markdown("", theme), console=console)
+            live = Live(make_renderable("", theme), console=console)
             live_callback = LiveMarkdownCallback(live, theme)
             click.echo()
             with live:

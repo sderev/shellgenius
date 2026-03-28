@@ -885,7 +885,7 @@ def test_live_streaming_fallback_rich_path_keeps_single_leading_blank_line(monke
     monkeypatch.setattr(cli_module, "get_tty_state", lambda: cli_module.TTYState(True, True, True))
     monkeypatch.setattr(cli_module, "Live", DummyLive)
     monkeypatch.setattr(cli_module, "make_console", lambda _theme: FakeConsole())
-    monkeypatch.setattr(cli_module, "make_markdown", lambda text, _theme: text)
+    monkeypatch.setattr(cli_module, "make_renderable", lambda text, _theme: text)
     monkeypatch.setattr(
         cli_module,
         "chatgpt_request",
@@ -897,6 +897,110 @@ def test_live_streaming_fallback_rich_path_keeps_single_leading_blank_line(monke
     assert result.exit_code == 0
     assert result.output.startswith("\n```bash\n")
     assert not result.output.startswith("\n\n")
+
+
+def test_live_streaming_callback_uses_renderable(monkeypatch):
+    updates = []
+    renderable_calls = []
+
+    class FakeLive:
+        def update(self, renderable):
+            updates.append(renderable)
+
+    theme = LmtTheme(
+        code_block_theme="alabaster",
+        shellgenius_theme="alabaster",
+        shellgenius_code_block_theme="alabaster",
+        shellgenius_command_block_style="on #f8f8f8",
+    )
+
+    def spy_renderable(text, received_theme):
+        renderable_calls.append((text, received_theme))
+        return f"rendered:{text}"
+
+    monkeypatch.setattr(cli_module, "make_renderable", spy_renderable)
+
+    callback = cli_module.LiveMarkdownCallback(FakeLive(), theme)
+    callback(response_text())
+
+    assert renderable_calls == [(response_text(), theme)]
+    assert updates == [f"rendered:{response_text()}"]
+
+
+# -- lmterminal theme integration ---------------------------------------------
+
+
+def test_render_response_rich_path_uses_theme(monkeypatch):
+    console_calls = []
+    renderable_calls = []
+
+    class FakeConsole:
+        def print(self, _renderable):
+            pass
+
+    theme = LmtTheme(code_block_theme="zenburn", inline_code_theme="red on white")
+
+    def spy_console(t):
+        console_calls.append(t)
+        return FakeConsole()
+
+    def spy_renderable(text, t):
+        renderable_calls.append((text, t))
+        return text
+
+    monkeypatch.setattr(cli_module, "make_console", spy_console)
+    monkeypatch.setattr(cli_module, "make_renderable", spy_renderable)
+
+    cli_module.render_response(
+        "hello",
+        tty_state=cli_module.TTYState(True, True, True),
+        raw=False,
+        rich_flag=False,
+        command_only=False,
+        theme=theme,
+    )
+
+    assert console_calls == [theme]
+    assert renderable_calls == [("hello", theme)]
+
+
+def test_render_response_uses_shellgenius_renderable_when_theme_requests_it(monkeypatch):
+    console_calls = []
+    renderable_calls = []
+
+    class FakeConsole:
+        def print(self, _renderable):
+            pass
+
+    theme = LmtTheme(
+        code_block_theme="alabaster",
+        shellgenius_theme="alabaster",
+        shellgenius_code_block_theme="alabaster",
+        shellgenius_command_block_style="on #f8f8f8",
+    )
+
+    def spy_console(t):
+        console_calls.append(t)
+        return FakeConsole()
+
+    def spy_renderable(text, t):
+        renderable_calls.append((text, t))
+        return text
+
+    monkeypatch.setattr(cli_module, "make_console", spy_console)
+    monkeypatch.setattr(cli_module, "make_renderable", spy_renderable)
+
+    cli_module.render_response(
+        "hello",
+        tty_state=cli_module.TTYState(True, True, True),
+        raw=False,
+        rich_flag=False,
+        command_only=False,
+        theme=theme,
+    )
+
+    assert console_calls == [theme]
+    assert renderable_calls == [("hello", theme)]
 
 
 # -- missing coverage ----------------------------------------------------------
