@@ -5,12 +5,14 @@ from rich.theme import Theme
 
 import shellgenius.theme as theme_module
 from shellgenius.theme import (
+    AlabasterShellGeniusStyle,
     AlabasterStyle,
     LmtTheme,
     _make_shell_command_block,
     load_lmt_theme,
     make_console,
     make_markdown,
+    make_renderable,
 )
 
 
@@ -383,6 +385,10 @@ def test_make_markdown_uses_default_without_theme():
 
 def test_alabaster_style_uses_builtin_background():
     assert AlabasterStyle.background_color == "#f8f8f8"
+
+
+def test_alabaster_shellgenius_style_has_light_background():
+    assert AlabasterShellGeniusStyle.background_color == "#ececec"
 
 
 def test_load_lmt_theme_accepts_alabaster(tmp_path, monkeypatch):

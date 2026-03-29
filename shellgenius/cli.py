@@ -592,8 +592,7 @@ def prompt(
 
     parsed_response = parse_generated_command(generated_text)
 
-    if plain_output:
-        click.echo()
+    click.echo()
 
     if not click.confirm("Execute this command?", default=False):
         click.echo("Not executed.")

@@ -4,6 +4,8 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from pygments import lex
+from pygments.lexers import BashLexer
 from pygments.style import Style as _PygmentsStyle
 from pygments.styles import get_style_by_name
 from pygments.token import (
@@ -19,12 +21,20 @@ from pygments.token import (
     Token,
 )
 from pygments.util import ClassNotFound
-from rich.console import Console
+from rich.console import Console, Group
 from rich.errors import StyleSyntaxError
 from rich.markdown import Markdown
+from rich.padding import Padding
 from rich.style import Style
 from rich.syntax import PygmentsSyntaxTheme
+from rich.text import Text
 from rich.theme import Theme
+
+from .response_parser import (
+    ParsedShellResponse,
+    ShellGeniusResponseError,
+    parse_shellgenius_response,
+)
 
 # ---------------------------------------------------------------------------
 # Built-in custom code-block themes
@@ -67,8 +77,45 @@ class AlabasterStyle(_PygmentsStyle):
     }
 
 
+class AlabasterShellGeniusStyle(_PygmentsStyle):
+    """Demo-friendly light style with more visible shell-command coloring."""
+
+    name = "alabaster-shellgenius"
+    background_color = "#ececec"
+
+    styles = {
+        Token: "#000000",
+        Token.Text: "#000000",
+        Comment: "#aa3731",
+        Comment.Preproc: "#aa3731",
+        String: "#448c27",
+        Number: "#7a3e9d",
+        Keyword: "#7a3e9d",
+        Keyword.Type: "#000000",
+        Name: "#325cc0",
+        Name.Function: "#325cc0",
+        Name.Class: "#325cc0",
+        Name.Decorator: "#325cc0",
+        Name.Tag: "#007acc",
+        Name.Attribute: "#325cc0",
+        Name.Builtin: "#325cc0",
+        Name.Variable: "#7a3e9d",
+        Operator: "#000000",
+        Punctuation: "#777777",
+        Generic.Heading: "#325cc0",
+        Generic.Subheading: "#325cc0",
+        Generic.Deleted: "#aa3731",
+        Generic.Inserted: "#448c27",
+        Generic.Error: "#aa3731",
+        Generic.Emph: "italic",
+        Generic.Strong: "bold",
+        Error: "#aa3731",
+    }
+
+
 _CUSTOM_CODE_THEMES: dict[str, type[_PygmentsStyle]] = {
     "alabaster": AlabasterStyle,
+    "alabaster-shellgenius": AlabasterShellGeniusStyle,
 }
 
 _SHELLGENIUS_THEME_STYLES: dict[str, dict[str, str]] = {
@@ -84,14 +131,14 @@ _SHELLGENIUS_THEME_STYLES: dict[str, dict[str, str]] = {
         "status.spinner": "#325cc0",
     },
     "alabaster-shellgenius": {
-        "markdown.h1": "bold #005cc5",
-        "markdown.h2": "bold #6f42c1",
-        "markdown.h3": "bold #22863a",
-        "markdown.item.bullet": "#d73a49",
-        "markdown.link": "#005cc5",
-        "markdown.link_url": "underline #005cc5",
-        "markdown.hr": "#d0d7de",
-        "status.spinner": "#22863a",
+        "markdown.h1": "bold #005faf",
+        "markdown.h2": "bold #5f00d7",
+        "markdown.h3": "bold #008700",
+        "markdown.item.bullet": "#d70000",
+        "markdown.link": "#005faf",
+        "markdown.link_url": "underline #005faf",
+        "markdown.hr": "#c5cbd3",
+        "status.spinner": "#008700",
     },
 }
 
