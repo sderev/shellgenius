@@ -1,0 +1,1 @@
+"""ShellGenius package."""

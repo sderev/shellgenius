@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [project.scripts]
-shellgenius = "shellgenius.cli:shellgenius"
+shellgenius = "shellgenius._entrypoint:main"
 
 [project.entry-points."pygments.styles"]
 alabaster = "shellgenius.theme:AlabasterStyle"

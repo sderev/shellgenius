@@ -3,12 +3,14 @@ import subprocess
 import sys
 import time
 import types
+from types import SimpleNamespace
 
 import httpx
 import pytest
 from click.testing import CliRunner
 from openai import RateLimitError
 
+import shellgenius._entrypoint as entrypoint_module
 import shellgenius.cli as cli_module
 from shellgenius.theme import LmtTheme
 
@@ -801,6 +803,31 @@ def test_shellgenius_c_short_flag_is_removed():
 
     assert result.exit_code != 0
     assert "No such option: -c" in result.output
+
+
+def test_entrypoint_main_delegates_to_cli_entrypoint(monkeypatch):
+    calls = []
+
+    monkeypatch.setattr(
+        entrypoint_module.importlib,
+        "import_module",
+        lambda name: calls.append(name) or SimpleNamespace(shellgenius=lambda: 7),
+    )
+
+    assert entrypoint_module.main() == 7
+    assert calls == ["shellgenius.cli"]
+
+
+def test_entrypoint_main_exits_130_on_keyboard_interrupt_during_cli_import(monkeypatch):
+    def raise_interrupt(_name):
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(entrypoint_module.importlib, "import_module", raise_interrupt)
+
+    with pytest.raises(SystemExit) as error:
+        entrypoint_module.main()
+
+    assert error.value.code == 130
 
 
 # -- blank line before Rich output ---------------------------------------------
