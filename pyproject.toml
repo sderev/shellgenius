@@ -16,6 +16,8 @@ dependencies = [
     "click",
     "click-default-group",
     "openai>=2,<3",
+    "pygments>=2.20",
+    "requests>=2.33",
     "rich",
     "tiktoken",
 ]
