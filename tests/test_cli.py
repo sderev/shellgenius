@@ -143,28 +143,7 @@ def test_shellgenius_redirected_stderr_still_streams_and_prompts(monkeypatch):
     assert executed == [((["/mock/bash", "-c", "printf 'ok'"],), {"check": True})]
 
 
-def test_shellgenius_plain_disables_streaming_in_tty(monkeypatch):
-    runner = CliRunner()
-    calls = []
-
-    monkeypatch.setattr(cli_module, "get_tty_state", lambda: cli_module.TTYState(True, True, True))
-    monkeypatch.setattr(
-        cli_module,
-        "chatgpt_request",
-        lambda *args, **kwargs: calls.append(kwargs) or (response_text(), 0, object()),
-    )
-
-    result = runner.invoke(cli_module.shellgenius, ["--plain", "print", "ok"], input="n\n")
-
-    assert result.exit_code == 0
-    assert calls == [{"model": cli_module.DEFAULT_MODEL, "stream": False}]
-    assert response_text() + "\n\nExecute this command?" in result.output
-    assert "Execute this command?" in result.output
-    assert "Not executed." in result.output
-
-
-@pytest.mark.parametrize("flag", ["--cmd", "--command-only"])
-def test_shellgenius_command_only_prints_only_the_command(monkeypatch, flag):
+def test_shellgenius_command_only_prints_only_the_command(monkeypatch):
     runner = CliRunner()
 
     monkeypatch.setattr(
@@ -176,7 +155,7 @@ def test_shellgenius_command_only_prints_only_the_command(monkeypatch, flag):
         lambda *args, **kwargs: (response_text(), 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, [flag, "print", "ok"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "print", "ok"])
 
     assert result.exit_code == 0
     assert result.output == "printf 'ok'\n"
@@ -194,7 +173,7 @@ def test_shellgenius_command_only_accepts_plain_text_explanation(monkeypatch):
         lambda *args, **kwargs: (response_text_with_plain_text_explanation(), 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "print", "ok"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "print", "ok"])
 
     assert result.exit_code == 0
     assert result.output == "printf 'ok'\n"
@@ -213,7 +192,7 @@ def test_shellgenius_command_only_rejects_missing_shell_executable(monkeypatch):
         lambda *args, **kwargs: (response_text_with_language("zsh"), 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "print", "ok"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "print", "ok"])
 
     assert result.exit_code == 1
     assert "Cannot execute: `zsh` is not installed." in result.output
@@ -231,7 +210,7 @@ def test_shellgenius_rejects_non_shell_fence_for_command_only(monkeypatch):
         lambda *args, **kwargs: ("```python\nprint('ok')\n```", 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "print", "ok"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "print", "ok"])
 
     assert result.exit_code == 1
     assert (
@@ -252,7 +231,7 @@ def test_shellgenius_command_only_keeps_embedded_fence_lines(monkeypatch):
         lambda *args, **kwargs: (response_text_with_embedded_fence(), 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "write", "snippet"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "write", "snippet"])
 
     assert result.exit_code == 0
     assert result.output == "cat <<'EOF' > snippet.md\n```\nhello\n```\nEOF\n"
@@ -270,7 +249,7 @@ def test_shellgenius_command_only_ignores_explanation_fenced_blocks(monkeypatch)
         lambda *args, **kwargs: (response_text_with_explanation_fenced_block(), 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "print", "ok"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "print", "ok"])
 
     assert result.exit_code == 0
     assert result.output == "printf 'ok'\n"
@@ -629,7 +608,7 @@ def test_shellgenius_reports_parse_error_for_command_only(monkeypatch):
         lambda *args, **kwargs: ("Here is your command: ls", 0, object()),
     )
 
-    result = runner.invoke(cli_module.shellgenius, ["--command-only", "list", "files"])
+    result = runner.invoke(cli_module.shellgenius, ["--cmd", "list", "files"])
 
     assert result.exit_code == 1
     assert "Response must start with a fenced code block." in result.output
@@ -803,6 +782,16 @@ def test_shellgenius_c_short_flag_is_removed():
 
     assert result.exit_code != 0
     assert "No such option: -c" in result.output
+
+
+@pytest.mark.parametrize("flag", ["--plain", "-p", "--command-only"])
+def test_shellgenius_retrocompat_output_aliases_are_removed(flag):
+    runner = CliRunner()
+
+    result = runner.invoke(cli_module.shellgenius, [flag, "print", "ok"])
+
+    assert result.exit_code != 0
+    assert f"No such option: {flag}" in result.output
 
 
 def test_entrypoint_main_delegates_to_cli_entrypoint(monkeypatch):

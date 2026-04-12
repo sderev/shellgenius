@@ -77,45 +77,8 @@ class AlabasterStyle(_PygmentsStyle):
     }
 
 
-class AlabasterShellGeniusStyle(_PygmentsStyle):
-    """Demo-friendly light style with more visible shell-command coloring."""
-
-    name = "alabaster-shellgenius"
-    background_color = "#ececec"
-
-    styles = {
-        Token: "#000000",
-        Token.Text: "#000000",
-        Comment: "#aa3731",
-        Comment.Preproc: "#aa3731",
-        String: "#448c27",
-        Number: "#7a3e9d",
-        Keyword: "#7a3e9d",
-        Keyword.Type: "#000000",
-        Name: "#325cc0",
-        Name.Function: "#325cc0",
-        Name.Class: "#325cc0",
-        Name.Decorator: "#325cc0",
-        Name.Tag: "#007acc",
-        Name.Attribute: "#325cc0",
-        Name.Builtin: "#325cc0",
-        Name.Variable: "#7a3e9d",
-        Operator: "#000000",
-        Punctuation: "#777777",
-        Generic.Heading: "#325cc0",
-        Generic.Subheading: "#325cc0",
-        Generic.Deleted: "#aa3731",
-        Generic.Inserted: "#448c27",
-        Generic.Error: "#aa3731",
-        Generic.Emph: "italic",
-        Generic.Strong: "bold",
-        Error: "#aa3731",
-    }
-
-
 _CUSTOM_CODE_THEMES: dict[str, type[_PygmentsStyle]] = {
     "alabaster": AlabasterStyle,
-    "alabaster-shellgenius": AlabasterShellGeniusStyle,
 }
 
 _SHELLGENIUS_THEME_STYLES: dict[str, dict[str, str]] = {
@@ -130,21 +93,10 @@ _SHELLGENIUS_THEME_STYLES: dict[str, dict[str, str]] = {
         "markdown.hr": "#c7c7c7",
         "status.spinner": "#325cc0",
     },
-    "alabaster-shellgenius": {
-        "markdown.h1": "bold #005faf",
-        "markdown.h2": "bold #5f00d7",
-        "markdown.h3": "bold #008700",
-        "markdown.item.bullet": "#d70000",
-        "markdown.link": "#005faf",
-        "markdown.link_url": "underline #005faf",
-        "markdown.hr": "#c5cbd3",
-        "status.spinner": "#008700",
-    },
 }
 
 _SHELLGENIUS_COMMAND_BLOCK_STYLES: dict[str, str] = {
     "alabaster": f"on {AlabasterStyle.background_color}",
-    "alabaster-shellgenius": f"on {AlabasterShellGeniusStyle.background_color}",
 }
 
 
@@ -260,13 +212,6 @@ def _theme_from_preset(name: str | None) -> LmtTheme:
     )
 
 
-def _legacy_shellgenius_theme(code_block_theme: str | None) -> LmtTheme:
-    if code_block_theme != "alabaster-shellgenius":
-        return LmtTheme()
-
-    return _theme_from_preset(code_block_theme)
-
-
 def _resolve_code_theme(name: str) -> str | PygmentsSyntaxTheme:
     """Return a value suitable for ``Markdown(code_theme=...)``."""
     custom = _CUSTOM_CODE_THEMES.get(name)
@@ -295,12 +240,9 @@ def load_lmt_theme() -> LmtTheme:
 
     shellgenius_config = data.get("shellgenius")
     if not isinstance(shellgenius_config, dict):
-        return _merge_theme(theme, _legacy_shellgenius_theme(theme.code_block_theme))
+        return theme
 
     shellgenius_theme = _theme_from_preset(_validated_theme_value(shellgenius_config, "theme"))
-    if shellgenius_theme.shellgenius_theme is None:
-        shellgenius_theme = _legacy_shellgenius_theme(theme.code_block_theme)
-
     theme = _merge_theme(theme, shellgenius_theme)
     return _merge_theme(
         theme,
@@ -388,9 +330,7 @@ def _command_block_style(theme: LmtTheme) -> str:
     if override:
         return override
 
-    return (
-        theme.shellgenius_command_block_style or f"on {AlabasterShellGeniusStyle.background_color}"
-    )
+    return theme.shellgenius_command_block_style or f"on {AlabasterStyle.background_color}"
 
 
 def _style_for_shell_token(token, value: str, *, in_parameter_expansion: bool) -> str:

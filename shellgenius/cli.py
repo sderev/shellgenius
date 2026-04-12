@@ -468,9 +468,7 @@ def key_edit():
     is_flag=True,
     help="Force Rich formatting in a TTY; fall back to plain text otherwise.",
 )
-@click.option("--plain", "-p", is_flag=True, hidden=True)
 @click.option("--cmd", "command_only", is_flag=True, help="Print only the generated command.")
-@click.option("--command-only", "command_only", is_flag=True, hidden=True)
 @click.option(
     "--tokens", is_flag=True, help="Print prompt token count and estimated cost, then exit."
 )
@@ -482,7 +480,6 @@ def prompt(
     no_stream,
     raw,
     rich_flag,
-    plain,
     command_only,
     tokens,
 ):
@@ -493,8 +490,6 @@ def prompt(
     if not command_description:
         click.echo(ctx.get_help())
         return
-
-    raw = raw or plain
 
     tty_state = get_tty_state()
 

@@ -116,14 +116,14 @@ ShellGenius reads color settings from `~/.config/lmt/config.json`. If the file i
 
 These `lmterminal` compatibility keys apply across tools:
 
-* `code_block_theme` — any [Pygments style](https://pygments.org/styles/) name, plus the built-in `alabaster` and `alabaster-shellgenius` themes.
+* `code_block_theme` — any [Pygments style](https://pygments.org/styles/) name, plus the built-in `alabaster` theme.
 * `inline_code_theme` — any Rich style string, such as `"#325cc0 on #f0f0f0"`.
 
 ### ShellGenius-only overrides
 
 Add a `shellgenius` block to change ShellGenius without affecting other tools:
 
-* `theme` — ShellGenius's own preset. Built-in values: `default`, `alabaster`, `alabaster-shellgenius`. Any Pygments theme name also works for fenced code blocks.
+* `theme` — ShellGenius's own preset. Built-in values: `default`, `alabaster`. Any Pygments theme name also works for fenced code blocks.
 * `styles` — override individual Rich semantic styles (`markdown.h1`, `markdown.code`, `markdown.code_block`). `markdown.code` overrides the top-level `inline_code_theme` for ShellGenius only; `markdown.code_block` controls the command-block background in TTY output.
 
 Example:
@@ -144,7 +144,7 @@ Example:
 
 Invalid `styles` entries are ignored individually, so one bad override does not discard the rest. The built-in `alabaster` preset keeps the upstream `#f8f8f8` syntax background; for a darker command block, add `{"markdown.code_block": "on #f0f0f0"}` under `styles`.
 
-Legacy top-level `code_block_theme: "alabaster-shellgenius"` is still honored, but new config should prefer `shellgenius.theme`. These settings affect Rich output only; `--raw` and `--cmd` output is unchanged.
+These settings affect Rich output only; `--raw` and `--cmd` output is unchanged.
 
 ## License
 

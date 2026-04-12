@@ -19,58 +19,39 @@ def _parse_key_file(path: Path) -> str:
     Accepted formats:
     * ``OPENAI_API_KEY=sk-...``
     * ``export OPENAI_API_KEY=sk-...``
-    * A single bare key on its own line.
+    * Quoted values for those assignments.
+
+    The file is dedicated to this single key. Blank lines and comments are
+    allowed, but any other non-comment content makes the file invalid.
     """
     try:
-        text = path.read_text(encoding="utf-8").strip()
+        text = path.read_text(encoding="utf-8")
     except (FileNotFoundError, UnicodeDecodeError, OSError):
         return ""
 
-    if not text:
-        return ""
-
-    bare_key = ""
-    saw_other_content = False
+    key = ""
 
     for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
 
-        # export OPENAI_API_KEY=...
-        if line.startswith("export "):
-            line = line[len("export ") :].strip()
-            if "=" not in line:
-                saw_other_content = True
-                continue
-
-        # OPENAI_API_KEY=...
-        if line.startswith("OPENAI_API_KEY="):
+        if line.startswith("export OPENAI_API_KEY="):
+            value = line[len("export OPENAI_API_KEY=") :]
+        elif line.startswith("OPENAI_API_KEY="):
             value = line[len("OPENAI_API_KEY=") :]
-            # Strip optional surrounding quotes.
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
-                value = value[1:-1]
-            return value.strip()
+        else:
+            return ""
 
-        if line == "OPENAI_API_KEY":
-            saw_other_content = True
-            continue
+        # Strip optional surrounding quotes.
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
 
-        if "=" in line:
-            saw_other_content = True
-            continue
+        if key:
+            return ""
+        key = value.strip()
 
-        if bare_key or saw_other_content:
-            saw_other_content = True
-            continue
-
-        # Single bare key on its own non-comment line.
-        bare_key = line
-
-    if bare_key and not saw_other_content:
-        return bare_key
-
-    return ""
+    return key
 
 
 def get_api_key() -> str:
