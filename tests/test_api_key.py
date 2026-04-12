@@ -20,12 +20,6 @@ def test_parse_key_file_with_export(tmp_path):
     assert api_key_module._parse_key_file(key_file) == "sk-test456"
 
 
-def test_parse_key_file_with_bare_key(tmp_path):
-    key_file = tmp_path / "key.env"
-    key_file.write_text("sk-barekey789\n")
-    assert api_key_module._parse_key_file(key_file) == "sk-barekey789"
-
-
 def test_parse_key_file_with_quoted_value(tmp_path):
     key_file = tmp_path / "key.env"
     key_file.write_text('OPENAI_API_KEY="sk-quoted"\n')
@@ -44,10 +38,22 @@ def test_parse_key_file_skips_comments(tmp_path):
     assert api_key_module._parse_key_file(key_file) == "sk-after-comment"
 
 
-def test_parse_key_file_ignores_other_assignments_before_key(tmp_path):
+def test_parse_key_file_allows_comments_after_key(tmp_path):
+    key_file = tmp_path / "key.env"
+    key_file.write_text("OPENAI_API_KEY=sk-before-comment\n# trailing comment\n")
+    assert api_key_module._parse_key_file(key_file) == "sk-before-comment"
+
+
+def test_parse_key_file_rejects_other_assignments_before_key(tmp_path):
     key_file = tmp_path / "key.env"
     key_file.write_text("export PATH=/usr/bin\nOPENAI_API_KEY=sk-after-path\n")
-    assert api_key_module._parse_key_file(key_file) == "sk-after-path"
+    assert api_key_module._parse_key_file(key_file) == ""
+
+
+def test_parse_key_file_rejects_other_assignments_after_key(tmp_path):
+    key_file = tmp_path / "key.env"
+    key_file.write_text("OPENAI_API_KEY=sk-before-path\nexport PATH=/usr/bin\n")
+    assert api_key_module._parse_key_file(key_file) == ""
 
 
 def test_parse_key_file_rejects_non_key_assignment_as_bare_key(tmp_path):
@@ -68,9 +74,15 @@ def test_parse_key_file_rejects_bare_key_variable_name(tmp_path):
     assert api_key_module._parse_key_file(key_file) == ""
 
 
-def test_parse_key_file_rejects_bare_key_when_file_has_other_content(tmp_path):
+def test_parse_key_file_rejects_bare_key_line(tmp_path):
     key_file = tmp_path / "key.env"
-    key_file.write_text("export PATH=/usr/bin\nsk-barekey789\n")
+    key_file.write_text("sk-barekey789\n")
+    assert api_key_module._parse_key_file(key_file) == ""
+
+
+def test_parse_key_file_rejects_multiple_key_assignments(tmp_path):
+    key_file = tmp_path / "key.env"
+    key_file.write_text("OPENAI_API_KEY=sk-first\nOPENAI_API_KEY=sk-second\n")
     assert api_key_module._parse_key_file(key_file) == ""
 
 
