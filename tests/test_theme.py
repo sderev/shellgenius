@@ -5,7 +5,6 @@ from rich.theme import Theme
 
 import shellgenius.theme as theme_module
 from shellgenius.theme import (
-    AlabasterShellGeniusStyle,
     AlabasterStyle,
     LmtTheme,
     _make_shell_command_block,
@@ -272,9 +271,7 @@ def test_load_lmt_theme_ignores_invalid_style_overrides_individually(tmp_path, m
     assert theme.rich_styles == {"markdown.h1": "bold blue"}
 
 
-def test_load_lmt_theme_keeps_legacy_top_level_alabaster_shellgenius_behavior(
-    tmp_path, monkeypatch
-):
+def test_load_lmt_theme_rejects_alabaster_shellgenius_legacy_value(tmp_path, monkeypatch):
     config_dir = tmp_path / ".config" / "lmt"
     config_dir.mkdir(parents=True)
     (config_dir / "config.json").write_text(
@@ -284,10 +281,7 @@ def test_load_lmt_theme_keeps_legacy_top_level_alabaster_shellgenius_behavior(
 
     theme = load_lmt_theme()
 
-    assert theme.code_block_theme == "alabaster-shellgenius"
-    assert theme.shellgenius_theme == "alabaster-shellgenius"
-    assert theme.resolved_code_block_theme == "alabaster-shellgenius"
-    assert theme.uses_shellgenius_command_renderer is True
+    assert theme == LmtTheme()
 
 
 # -- make_console -------------------------------------------------------------
@@ -387,10 +381,6 @@ def test_alabaster_style_uses_builtin_background():
     assert AlabasterStyle.background_color == "#f8f8f8"
 
 
-def test_alabaster_shellgenius_style_has_light_background():
-    assert AlabasterShellGeniusStyle.background_color == "#ececec"
-
-
 def test_load_lmt_theme_accepts_alabaster(tmp_path, monkeypatch):
     config_dir = tmp_path / ".config" / "lmt"
     config_dir.mkdir(parents=True)
@@ -402,7 +392,7 @@ def test_load_lmt_theme_accepts_alabaster(tmp_path, monkeypatch):
     assert theme.code_block_theme == "alabaster"
 
 
-def test_load_lmt_theme_accepts_alabaster_shellgenius(tmp_path, monkeypatch):
+def test_load_lmt_theme_rejects_alabaster_shellgenius(tmp_path, monkeypatch):
     config_dir = tmp_path / ".config" / "lmt"
     config_dir.mkdir(parents=True)
     (config_dir / "config.json").write_text(
@@ -412,8 +402,7 @@ def test_load_lmt_theme_accepts_alabaster_shellgenius(tmp_path, monkeypatch):
 
     theme = load_lmt_theme()
 
-    assert theme.code_block_theme == "alabaster-shellgenius"
-    assert theme.uses_shellgenius_command_renderer is True
+    assert theme == LmtTheme()
 
 
 def test_make_markdown_applies_alabaster_theme():
@@ -432,16 +421,6 @@ def test_make_markdown_alabaster_does_not_use_default():
     md = make_markdown("hello", theme)
 
     assert md.code_theme != "monokai"
-
-
-def test_make_markdown_applies_alabaster_shellgenius_theme():
-    from rich.syntax import PygmentsSyntaxTheme
-
-    theme = LmtTheme(shellgenius_code_block_theme="alabaster-shellgenius")
-
-    md = make_markdown("```bash\nffmpeg -i input.mp4\n```", theme)
-
-    assert isinstance(md.code_theme, PygmentsSyntaxTheme)
 
 
 def test_make_shell_command_block_drops_lexer_trailing_newline():
