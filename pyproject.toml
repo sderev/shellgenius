@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shellgenius"
-version = "0.2.0"
+version = "0.2.1"
 description = "ShellGenius is a tool to generate shell commands from description in natural language."
 readme = "README.md"
 license = {text = "Apache-2.0"}

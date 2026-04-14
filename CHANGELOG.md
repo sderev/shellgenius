@@ -4,6 +4,18 @@
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.2.1'></a>
+## 0.2.1 — 2026-04-14
+
+### Removed
+
+* Remove the unsupported `alabaster-shellgenius` theme name from ShellGenius config. The built-in theme surface is now just `alabaster` plus standard Pygments theme names.
+* Remove the hidden `--plain`, `-p`, and `--command-only` CLI aliases. Use `--raw` for plain text and `--cmd` for command-only output.
+
+### Changed
+
+* `~/.config/lmt/key.env` is now parsed as a dedicated ShellGenius key file. ShellGenius still accepts `OPENAI_API_KEY=...`, quoted values, and `export OPENAI_API_KEY=...`, but no longer accepts a bare key line or unrelated env assignments in that file.
+
 <a id='changelog-0.2.0'></a>
 ## 0.2.0 — 2026-04-08
 
