@@ -43,7 +43,7 @@ Repository = "https://github.com/sderev/shellgenius"
 
 [dependency-groups]
 dev = [
-    "pytest>=8,<9",
+    "pytest>=8,<10",
     "ruff==0.15.8",
     "scriv[toml]>=1.8,<2",
 ]
