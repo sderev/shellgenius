@@ -4,6 +4,13 @@
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.2.2'></a>
+## 0.2.2 — 2026-07-14
+
+### Security
+
+* Update `idna` and `urllib3` to patched versions for current Dependabot security advisories.
+
 <a id='changelog-0.2.1'></a>
 ## 0.2.1 — 2026-04-14
 
